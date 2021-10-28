@@ -14,7 +14,7 @@ class Master(Process):
         self.model = pickle.load(path) # placeholder
 
     def compute_response():
-        sensor_data = self.sensor_connection.on_receive()
+        sensor_data = self.sensor_connection.receive()
         response = self.model.map(sensor_data)
         self.actuator_connection.send(response)
 
