@@ -12,11 +12,7 @@ class BaseConnection:
     # establish connection (keep trying until success)
     def connect(self):
         pass
-
-    # # start communication and initialize necessary variables ()
-    # def start_communication(self):
-    #     pass
-
+        
     # convert arrays into data bytes and send
     def send(self, data):
         pass
@@ -44,14 +40,13 @@ class TcpConnection(BaseConnection):
         self.port = int(self.config['port'])
         self.buffer_size = int(self.config['buffer_size'])
         self.timeout = self.config['timeout']
-        self.connect()
 
     def connect(self):
         while(self.connected == False):
             try:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.settimeout(self.timeout)
-                # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 if self.role == 'server':
                     self.socket.bind((self.ip, self.port))
                     self.socket.listen(1)
@@ -94,7 +89,7 @@ class TcpConnection(BaseConnection):
     def end_communication(self):
         if self.role == 'server':
             self.connection.close()
-        else self.role == 'client':
+        elif self.role == 'client':
             self.socket.close()
         self.connected = False
 
@@ -107,14 +102,13 @@ class UdpConnection(BaseConnection):
         self.buffer_size = int(self.config['buffer_size'])
         self.timeout = self.config['timeout']
         self.address = None
-        self.connect()
 
     def connect(self):
         while(self.connected == False):
             try:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 self.socket.settimeout(self.timeout)
-                # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 if self.role == 'server':
                     self.socket.bind((self.ip, self.port))
                     self.connected = True
@@ -163,7 +157,6 @@ class SerialConnection(BaseConnection):
         self.baud_rate = int(self.config['baudrate'])
         self.buffer_size = int(self.config['buffer_size'])
         self.timeout = self.config['timeout']
-        self.connect()
 
     def connect(self):
         while(self.connected == False):
@@ -194,6 +187,3 @@ class SerialConnection(BaseConnection):
     def end_communication(self):
         self.connection.close()
         self.connected = False
-
-class RpcConnection(BaseConnection):
-    pass
