@@ -45,13 +45,14 @@ class ActuatorServer(Thread):
             final_command = master_command
         else:
             final_command = sensor_command
+            
         print("performing command: ", final_command)
         status = True
         return status
 
     def run(self):
         self.server.register_function(self.execute, "execute")
-        self.server.serve_forever() 
+        self.server.serve_forever()
 
 class ActuatorToSensor(Thread):
     def __init__(self, config):
@@ -84,8 +85,8 @@ class Actuator(Process):
 
     def run(self):
         self.master_thread.start()
-        for name, connection in self.sensor_connections.items():
-            connection.connect()
+        for name, thread in self.sensor_threads.items():
+            thread.start()
 
         while True:
             time.sleep(0.1)
