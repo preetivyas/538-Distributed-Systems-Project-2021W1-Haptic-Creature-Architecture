@@ -76,6 +76,7 @@ class Actuator(Process):
         super().__init__()
         self.config = config
         self.master_thread = None
+        self.sensor_threads = {}
         for connection_type, connection_config in config.items():
             name = connection_config['name']
             if 'Rpc' in connection_type:
@@ -84,9 +85,11 @@ class Actuator(Process):
                 self.sensor_threads[name] = ActuatorToSensor(connection_config)
 
     def run(self):
-        self.master_thread.start()
-        for name, thread in self.sensor_threads.items():
-            thread.start()
+        if self.master_thread:
+             self.master_thread.start()
+        elif self.sensor_threads:
+             for name, thread in self.sensor_threads.items():
+                 thread.start()
 
         while True:
             time.sleep(0.1)
@@ -94,4 +97,4 @@ class Actuator(Process):
             for name, sensors in self.sensor_threads.items():
                 sensor_msgs[name] = sensors.sensor_msg
 
-            self.ActuatorServer.sensor_msgs = sensor_msgs
+            ActuatorServer.sensor_msgs = sensor_msgs

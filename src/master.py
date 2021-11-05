@@ -64,6 +64,7 @@ class Master(Process):
         return responses
 
     def run(self):
+        
         # self.read_model(self.config['model_path'])
         for name, sensor in self.sensor_threads.items():
             sensor.start()

@@ -49,7 +49,7 @@ class TcpConnection(BaseConnection):
                 self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 if self.role == 'server':
                     self.socket.bind((self.ip, self.port))
-                    self.socket.listen(1)
+                    self.socket.listen(1) #revisit this value
                     self.connection, self.address = self.socket.accept()
                     self.connected = True
                     print('Tcp server connected to: ', self.address)

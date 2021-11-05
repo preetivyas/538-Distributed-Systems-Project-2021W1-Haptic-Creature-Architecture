@@ -1,5 +1,5 @@
 import configparser
-import master
+import sensor
 import connection
 
 def as_dict(config):
@@ -17,11 +17,10 @@ def read_config(file):
     return config_dict
 
 def main():
-    master_config_file = '../config/config_master.ini'
-    master_config = read_config(master_config_file)
-    master_process = master.Master(master_config)
-    master_process.start()
-   
+    sensor_config_file = '../config/config_sensor_1.ini' 
+    sensor_config = read_config(sensor_config_file)
+    sensor_process = sensor.Sensor(sensor_config)
+    sensor_process.start()
 
 
 if __name__ == '__main__':

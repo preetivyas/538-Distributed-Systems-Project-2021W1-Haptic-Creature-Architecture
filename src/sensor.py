@@ -35,12 +35,14 @@ class Sensor(Process):
         super().__init__()
         self.config = config
         self.master_thread = None
+        self.actuator_connections  = {}
+        
         for connection_type, connection_config in config.items():
             name = connection_config['name']
             if 'Udp' in connection_type:
                 self.master_thread = SensorToMaster(connection_config)
             if 'Serial' in connection_type:
-                self.actuator_connections[name] = SerialConnection(connection_config)
+                self.actuator_connections[name] = connection.SerialConnection(connection_config)
 
     def compute_response(self, name, msg):
         if name == 'actuator_1' and max(msg['data']) >= 1:
@@ -50,9 +52,11 @@ class Sensor(Process):
         return responses
 
     def run(self):
-        self.master_thread.start()
-        for name, connection in self.actuator_connections.items():
-            connection.connect()
+       if self.master_thread:
+            self.master_thread.start()
+       if self.actuator_connections:
+            for name, connection in self.actuator_connections.items(): 
+                connection.connect()
 
         while True:
             time.sleep(0.1)

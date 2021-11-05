@@ -1,5 +1,5 @@
 import configparser
-import master
+import actuator
 import connection
 
 def as_dict(config):
@@ -17,11 +17,10 @@ def read_config(file):
     return config_dict
 
 def main():
-    master_config_file = '../config/config_master.ini'
-    master_config = read_config(master_config_file)
-    master_process = master.Master(master_config)
-    master_process.start()
-   
+    actuator_config_file = '../config/config_actuator_1.ini' 
+    actuator_config = read_config(actuator_config_file)
+    actuator_process = actuator.Actuator(actuator_config)
+    actuator_process.start()
 
 
 if __name__ == '__main__':
