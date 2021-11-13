@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+
+package actuator_server;
+
+// Interface exported by the server.
+service ActuatorServer {
+
+  rpc execute(Command) returns (Status) {}
+
+}
+
+message Command {
+  int32 timestamp = 1;
+  double master_command = 2;
+}
+
+message Status {
+  int32 timestamp = 1;
+  bool status = 2;
+}

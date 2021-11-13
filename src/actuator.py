@@ -3,56 +3,38 @@ import connection
 import pickle
 from threading import Thread
 import time
-from xmlrpc.client import ServerProxy
-from xmlrpc.server import SimpleXMLRPCServer
+
+import grpc
+import actuator_server_pb2
+import actuator_server_pb2_grpc
 
 
 class ActuatorClient:
     def __init__(self, config):
         self.ip = config['ip']
         self.port = config['port']
-        uri = "http://" + self.ip + ":" + self.port
-        self.actuator = ServerProxy(uri)
+        address = self.ip + ":" + self.port
+        channel = grpc.insecure_channel(address)
+        self.actuator = actuator_server_pb2_grpc.ActuatorServerStub(channel)
 
     def perform(timestamp, command):
-        status = self.actuator.execute(timestamp, command)
-        return status
+        command_msg = actuator_server_pb2.Command(timestamp=timestamp, master_command=command)
+        status_msg = self.actuator.execute(command_msg)
+        return status_msg.status
 
-class ActuatorServer(Thread):
-    def __init__(self, config):
-        self.ip = config['ip']
-        self.port = int(config['port'])
-        self.server = SimpleXMLRPCServer((self.ip, self.port))
-        self.sensor_msgs = None
+class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
+    def __init__(self):
+        self.master_command_msg = {}
 
-    def execute(self, timestamp, master_command):
-        sensor_msgs = self.sensor_msgs
+    def execute(self, request, context):
 
-        timestamps = {}
-        sensor_commands = {}
-        for name, sensor_msg in sensor_msgs.items():
-            timestamps[name] = sensor_msg['timestamp']
-            sensor_commands[name] = sensor_msg['data']
+        self.master_command_msg['timestamp'] = request.timestamp
+        self.master_command_msg['data'] = request.master_command
 
-        use_master = True
-        sensor_command = master_command
-        for name, sensor_time in timestamps.items():
-            if timestamp < timestamps[name] + (0.3 * (10**6)):
-                use_master = False
-                sensor_command = sensor_commands[name]
-
-        if use_master:
-            final_command = master_command
-        else:
-            final_command = sensor_command
-            
-        print("performing command: ", final_command)
+        timestamp_new = time.time()
         status = True
-        return status
-
-    def run(self):
-        self.server.register_function(self.execute, "execute")
-        self.server.serve_forever()
+        return_msg = actuator_server_pb2.Status(timestamp=timestamp_new, status=status)
+        return return_msg
 
 class ActuatorToSensor(Thread):
     def __init__(self, config):
@@ -80,21 +62,45 @@ class Actuator(Process):
         for connection_type, connection_config in config.items():
             name = connection_config['name']
             if 'Rpc' in connection_type:
-                self.master_thread = ActuatorServer(connection_config)
+                self.master_thread = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+                self.master_servicer = ActuatorServicer()
+                actuator_server_pb2_grpc.add_ActuatorServerServicer_to_server(
+                    self.master_servicer, self.master_thread)
+                address = config['ip'] + ':' + config['port']
+                self.master_thread.add_insecure_port(address)
             if 'Serial' in connection_type:
                 self.sensor_threads[name] = ActuatorToSensor(connection_config)
 
     def run(self):
         if self.master_thread:
-             self.master_thread.start()
+            self.master_thread.start()
+            self.master_thread.wait_for_termination()
         elif self.sensor_threads:
-             for name, thread in self.sensor_threads.items():
-                 thread.start()
+            for name, thread in self.sensor_threads.items():
+                thread.start()
 
         while True:
             time.sleep(0.1)
             sensor_msgs = {}
             for name, sensors in self.sensor_threads.items():
                 sensor_msgs[name] = sensors.sensor_msg
+                sensor_timestamps[name] = sensor_msg['timestamp']
+                sensor_commands[name] = sensor_msg['data']
 
-            ActuatorServer.sensor_msgs = sensor_msgs
+            master_command_msg = self.master_servicer.master_command_msg
+            master_timestamp = master_command_msg['master_timestamp']
+            master_command = master_command_msg['data']
+
+            use_master = True
+            sensor_command = master_command
+            for name, sensor_time in sensor_timestamps.items():
+                if master_timestamp < sensor_timestamps[name] + (0.3 * (10**6)):
+                    use_master = False
+                    sensor_command = sensor_commands[name]
+
+            if use_master:
+                final_command = master_command
+            else:
+                final_command = sensor_command
+                
+            print("performing command: ", final_command)

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+
+package master_server;
+
+// Interface exported by the server.
+service MasterServer {
+
+  rpc get_sensor_data(SensorName) returns (SensorData) {}
+
+}
+
+message SensorName {
+  string name = 1;
+}
+
+message SensorData {
+  int32 timestamp = 1;
+  int32 row_number = 2;
+  int32 col_number = 3;
+  repeated double sensor_data = 4;
+}
