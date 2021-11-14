@@ -1,4 +1,5 @@
 from multiprocessing import Process
+from concurrent import futures
 import connection
 import pickle
 from threading import Thread
@@ -9,7 +10,9 @@ import master_server_pb2
 import master_server_pb2_grpc
 import numpy as np
 
+#handling data from local sensor
 class MasterToSensor(Thread):
+
     def __init__(self, config):
         super().__init__()
         self.connection = connection.UdpConnection(config)
@@ -27,18 +30,20 @@ class MasterToSensor(Thread):
                 self.connection.connect()
 
 
+#handling data from other master servers
 class MasterServicer(master_server_pb2_grpc.MasterServerServicer):
+
     def __init__(self):
         self.sensor_msgs = None
 
     def get_sensor_data(self, request, context):
 
         sensor_name = request.name
-
-        data = sensor_msgs[name]
+        data = self.sensor_msgs[sensor_name] 
         sensor_proto = master_server_pb2.SensorData()
         data_array = np.array(data)
 
+        #PV: didn't quite understand the proto part
         sensor_proto.timestamp = time.time()
         sensor_proto.row_number = data_array.shape[1]
         sensor_proto.col_number = data_array.shape[0]
@@ -92,9 +97,10 @@ class Master(Process):
                 else:
                     self.actuator_clients[name] = ActuatorClient(connection_config)
 
-    def read_model(path):
+    def read_model(self, path):
         self.model = pickle.load(path) # placeholder
-        for name, master in self.other_master_threads.items():
+        
+        for name, master in self.other_master_threads.items(): #PV: does every master use the same model?
             master.model = self.model
 
     def compute_response(self, sensor_msgs, other_sensor_msgs=None):
@@ -103,7 +109,7 @@ class Master(Process):
         for name, sensor_msg in sensor_msgs.items():
             data[name] = sensor_msg['data']
             timestamps[name] = sensor_msg['timestamp']
-        responses = [1, 1, 1, 1]
+        responses = [1, 1, 1, 1] #PV: todo: reference the model here
         return responses
 
     def parse_sensor_protobuf(self, sensor_proto):

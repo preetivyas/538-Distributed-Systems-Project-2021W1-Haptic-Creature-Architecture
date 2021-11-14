@@ -15,7 +15,7 @@ class SensorToMaster(Thread):
         return np.random.rand(3, 10).tolist()
 
     # preprocess and send data
-    def send_data(msg):
+    def send_data(self,msg):
         msg_bytes = pickle.dumps(msg)
         self.master_connection.send(msg_bytes)
 
@@ -49,7 +49,7 @@ class Sensor(Process):
             response = 1
         else:
             response = 0
-        return responses
+        return response
 
     def run(self):
        if self.master_thread:
@@ -58,7 +58,7 @@ class Sensor(Process):
             for name, connection in self.actuator_connections.items(): 
                 connection.connect()
 
-        while True:
+       while True:
             time.sleep(0.1)
             sensor_msg = self.master_thread.sensor_msg
             for name, connection in self.actuator_connections.items():

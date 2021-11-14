@@ -1,4 +1,5 @@
 from multiprocessing import Process
+from concurrent import futures
 import connection
 import pickle
 from threading import Thread
@@ -17,9 +18,9 @@ class ActuatorClient:
         channel = grpc.insecure_channel(address)
         self.actuator = actuator_server_pb2_grpc.ActuatorServerStub(channel)
 
-    def perform(timestamp, command):
+    def perform(self, timestamp, command):
         command_msg = actuator_server_pb2.Command(timestamp=timestamp, master_command=command)
-        status_msg = self.actuator.execute(command_msg)
+        status_msg = self.actuator.execute(command_msg) #PV: where execute is called? is this calling actuatorservicer?
         return status_msg.status
 
 class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
@@ -30,6 +31,8 @@ class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
 
         self.master_command_msg['timestamp'] = request.timestamp
         self.master_command_msg['data'] = request.master_command
+
+        #PV: todo: add actuator action code?
 
         timestamp_new = time.time()
         status = True
@@ -82,10 +85,12 @@ class Actuator(Process):
         while True:
             time.sleep(0.1)
             sensor_msgs = {}
+            sensor_timestamps = {}
+            sensor_commands = {}
             for name, sensors in self.sensor_threads.items():
                 sensor_msgs[name] = sensors.sensor_msg
-                sensor_timestamps[name] = sensor_msg['timestamp']
-                sensor_commands[name] = sensor_msg['data']
+                sensor_timestamps[name] = sensors.sensor_msg['timestamp']
+                sensor_commands[name] = sensors.sensor_msg['data']
 
             master_command_msg = self.master_servicer.master_command_msg
             master_timestamp = master_command_msg['master_timestamp']

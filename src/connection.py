@@ -125,7 +125,7 @@ class UdpConnection(BaseConnection):
                 continue
 
     def send(self, data):
-        if connect == True:
+        if self.connect == True:
             if self.address == None:
                 _, self.address = self.socket.recvfrom(self.buffer_size)
             self.socket.sendto(data, self.address)
@@ -169,7 +169,7 @@ class SerialConnection(BaseConnection):
                 continue
 
     def send(self, data):
-        if connect == True:
+        if self.connect == True:
             self.connection.write(data)
             return True
         else:
@@ -178,7 +178,7 @@ class SerialConnection(BaseConnection):
     def receive(self):
         try:
             receive_data = self.connection.readline(self.buffer_size)
-            return True, data
+            return True, receive_data
         except serial.SerialTimeoutException:
             self.connected = False
             print('Serial Timeout')
