@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13master_server.proto\x12\rmaster_server\"\x1a\n\nSensorName\x12\x0c\n\x04name\x18\x01 \x01(\t\"\\\n\nSensorData\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x12\n\nrow_number\x18\x02 \x01(\x05\x12\x12\n\ncol_number\x18\x03 \x01(\x05\x12\x13\n\x0bsensor_data\x18\x04 \x03(\x01\x32Y\n\x0cMasterServer\x12I\n\x0fget_sensor_data\x12\x19.master_server.SensorName\x1a\x19.master_server.SensorData\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x13master_server.proto\x12\rmaster_server\"\x1a\n\nSensorName\x12\x0c\n\x04name\x18\x01 \x01(\t\"\\\n\nSensorData\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x12\n\nrow_number\x18\x02 \x01(\x05\x12\x12\n\ncol_number\x18\x03 \x01(\x05\x12\x13\n\x0bsensor_data\x18\x04 \x03(\x01\";\n\x10TimestampRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x14\n\x0csync_request\x18\x02 \x01(\x08\"\x1e\n\tTimestamp\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\"4\n\x0fTimestampChange\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06\x63hange\x18\x02 \x01(\x05\":\n\x15TimestampChangeStatus\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\xf3\x01\n\x0cMasterServer\x12I\n\x0fget_sensor_data\x12\x19.master_server.SensorName\x1a\x19.master_server.SensorData\"\x00\x12H\n\tsync_init\x12\x1f.master_server.TimestampRequest\x1a\x18.master_server.Timestamp\"\x00\x12N\n\x04sync\x12\x1e.master_server.TimestampChange\x1a$.master_server.TimestampChangeStatus\"\x00\x62\x06proto3'
 )
 
 
@@ -109,8 +109,161 @@ _SENSORDATA = _descriptor.Descriptor(
   serialized_end=158,
 )
 
+
+_TIMESTAMPREQUEST = _descriptor.Descriptor(
+  name='TimestampRequest',
+  full_name='master_server.TimestampRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='master_server.TimestampRequest.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sync_request', full_name='master_server.TimestampRequest.sync_request', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=160,
+  serialized_end=219,
+)
+
+
+_TIMESTAMP = _descriptor.Descriptor(
+  name='Timestamp',
+  full_name='master_server.Timestamp',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='master_server.Timestamp.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=221,
+  serialized_end=251,
+)
+
+
+_TIMESTAMPCHANGE = _descriptor.Descriptor(
+  name='TimestampChange',
+  full_name='master_server.TimestampChange',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='master_server.TimestampChange.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='change', full_name='master_server.TimestampChange.change', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=253,
+  serialized_end=305,
+)
+
+
+_TIMESTAMPCHANGESTATUS = _descriptor.Descriptor(
+  name='TimestampChangeStatus',
+  full_name='master_server.TimestampChangeStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='master_server.TimestampChangeStatus.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='master_server.TimestampChangeStatus.status', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=307,
+  serialized_end=365,
+)
+
 DESCRIPTOR.message_types_by_name['SensorName'] = _SENSORNAME
 DESCRIPTOR.message_types_by_name['SensorData'] = _SENSORDATA
+DESCRIPTOR.message_types_by_name['TimestampRequest'] = _TIMESTAMPREQUEST
+DESCRIPTOR.message_types_by_name['Timestamp'] = _TIMESTAMP
+DESCRIPTOR.message_types_by_name['TimestampChange'] = _TIMESTAMPCHANGE
+DESCRIPTOR.message_types_by_name['TimestampChangeStatus'] = _TIMESTAMPCHANGESTATUS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 SensorName = _reflection.GeneratedProtocolMessageType('SensorName', (_message.Message,), {
@@ -127,6 +280,34 @@ SensorData = _reflection.GeneratedProtocolMessageType('SensorData', (_message.Me
   })
 _sym_db.RegisterMessage(SensorData)
 
+TimestampRequest = _reflection.GeneratedProtocolMessageType('TimestampRequest', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPREQUEST,
+  '__module__' : 'master_server_pb2'
+  # @@protoc_insertion_point(class_scope:master_server.TimestampRequest)
+  })
+_sym_db.RegisterMessage(TimestampRequest)
+
+Timestamp = _reflection.GeneratedProtocolMessageType('Timestamp', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMP,
+  '__module__' : 'master_server_pb2'
+  # @@protoc_insertion_point(class_scope:master_server.Timestamp)
+  })
+_sym_db.RegisterMessage(Timestamp)
+
+TimestampChange = _reflection.GeneratedProtocolMessageType('TimestampChange', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPCHANGE,
+  '__module__' : 'master_server_pb2'
+  # @@protoc_insertion_point(class_scope:master_server.TimestampChange)
+  })
+_sym_db.RegisterMessage(TimestampChange)
+
+TimestampChangeStatus = _reflection.GeneratedProtocolMessageType('TimestampChangeStatus', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPCHANGESTATUS,
+  '__module__' : 'master_server_pb2'
+  # @@protoc_insertion_point(class_scope:master_server.TimestampChangeStatus)
+  })
+_sym_db.RegisterMessage(TimestampChangeStatus)
+
 
 
 _MASTERSERVER = _descriptor.ServiceDescriptor(
@@ -136,8 +317,8 @@ _MASTERSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=160,
-  serialized_end=249,
+  serialized_start=368,
+  serialized_end=611,
   methods=[
   _descriptor.MethodDescriptor(
     name='get_sensor_data',
@@ -146,6 +327,26 @@ _MASTERSERVER = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_SENSORNAME,
     output_type=_SENSORDATA,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='sync_init',
+    full_name='master_server.MasterServer.sync_init',
+    index=1,
+    containing_service=None,
+    input_type=_TIMESTAMPREQUEST,
+    output_type=_TIMESTAMP,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='sync',
+    full_name='master_server.MasterServer.sync',
+    index=2,
+    containing_service=None,
+    input_type=_TIMESTAMPCHANGE,
+    output_type=_TIMESTAMPCHANGESTATUS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

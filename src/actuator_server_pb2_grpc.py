@@ -20,6 +20,16 @@ class ActuatorServerStub(object):
                 request_serializer=actuator__server__pb2.Command.SerializeToString,
                 response_deserializer=actuator__server__pb2.Status.FromString,
                 )
+        self.sync_init = channel.unary_unary(
+                '/actuator_server.ActuatorServer/sync_init',
+                request_serializer=actuator__server__pb2.TimestampRequest.SerializeToString,
+                response_deserializer=actuator__server__pb2.Timestamp.FromString,
+                )
+        self.sync = channel.unary_unary(
+                '/actuator_server.ActuatorServer/sync',
+                request_serializer=actuator__server__pb2.TimestampChange.SerializeToString,
+                response_deserializer=actuator__server__pb2.TimestampChangeStatus.FromString,
+                )
 
 
 class ActuatorServerServicer(object):
@@ -32,6 +42,18 @@ class ActuatorServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def sync_init(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def sync(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ActuatorServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -39,6 +61,16 @@ def add_ActuatorServerServicer_to_server(servicer, server):
                     servicer.execute,
                     request_deserializer=actuator__server__pb2.Command.FromString,
                     response_serializer=actuator__server__pb2.Status.SerializeToString,
+            ),
+            'sync_init': grpc.unary_unary_rpc_method_handler(
+                    servicer.sync_init,
+                    request_deserializer=actuator__server__pb2.TimestampRequest.FromString,
+                    response_serializer=actuator__server__pb2.Timestamp.SerializeToString,
+            ),
+            'sync': grpc.unary_unary_rpc_method_handler(
+                    servicer.sync,
+                    request_deserializer=actuator__server__pb2.TimestampChange.FromString,
+                    response_serializer=actuator__server__pb2.TimestampChangeStatus.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -65,5 +97,39 @@ class ActuatorServer(object):
         return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/execute',
             actuator__server__pb2.Command.SerializeToString,
             actuator__server__pb2.Status.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def sync_init(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/sync_init',
+            actuator__server__pb2.TimestampRequest.SerializeToString,
+            actuator__server__pb2.Timestamp.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def sync(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/sync',
+            actuator__server__pb2.TimestampChange.SerializeToString,
+            actuator__server__pb2.TimestampChangeStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

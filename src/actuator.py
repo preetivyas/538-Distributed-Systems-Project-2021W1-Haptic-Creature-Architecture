@@ -10,7 +10,7 @@ import actuator_server_pb2
 import actuator_server_pb2_grpc
 
 
-class ActuatorClient:
+class ActuatorClient: #actuator client is actually master, master run functions in this class
     def __init__(self, config):
         self.ip = config['ip']
         self.port = config['port']
@@ -18,26 +18,52 @@ class ActuatorClient:
         channel = grpc.insecure_channel(address)
         self.actuator = actuator_server_pb2_grpc.ActuatorServerStub(channel)
 
-    def perform(self, timestamp, command):
+    def perform_command(self, timestamp, command):
         command_msg = actuator_server_pb2.Command(timestamp=timestamp, master_command=command)
-        status_msg = self.actuator.execute(command_msg) #PV: where execute is called? is this calling actuatorservicer?
+        status_msg = self.actuator.execute_command(command_msg) 
         return status_msg.status
+
+    def perform_sync_init(self, timestamp,   sync_request):
+        timestamprequest_msg = actuator_server_pb2.TimestampRequest(timestamp=timestamp, sync_request=sync_request)
+        timestamp_msg = self.actuator.execute_sync_init(timestamprequest_msg) 
+        return timestamp_msg.timestamp    
+
+    def perform_sync(self,  timestamp,  change):
+        timestampsync_msg = actuator_server_pb2.TimestampChange(timestamp=timestamp, change= change)
+        status_msg = self.actuator.execute_sync(timestampsync_msg) 
+        return status_msg.status     
 
 class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
     def __init__(self):
         self.master_command_msg = {}
+        self.master_timechange_msg = None
+        self.clock_change = None
 
-    def execute(self, request, context):
+    def execute_command(self, request, context):
 
         self.master_command_msg['timestamp'] = request.timestamp
         self.master_command_msg['data'] = request.master_command
 
         #PV: todo: add actuator action code?
-
-        timestamp_new = time.time()
+    
+        timestamp_new = time.time()*(10**6)+ self.clock_change
         status = True
         return_msg = actuator_server_pb2.Status(timestamp=timestamp_new, status=status)
         return return_msg
+
+    def execute_sync_init (self, request, context):
+        if request.sync_request: #sync_request message is true then return the current time stampe
+            timestamp_sync = time.time()*(10**6)+ self.clock_change
+            return actuator_server_pb2.Timestamp(timestamp=timestamp_sync)
+        else:
+            return actuator_server_pb2.Timestamp(timestamp=None)        
+
+    def execute_sync (self, request, context):
+        self.clock_change  = request.change
+        #PV:  self.master_timesync_msg will be added to all timestamp values
+        status = True
+        return actuator_server_pb2.TimestampChangeStatus(status=status)
+        
 
 class ActuatorToSensor(Thread):
     def __init__(self, config):

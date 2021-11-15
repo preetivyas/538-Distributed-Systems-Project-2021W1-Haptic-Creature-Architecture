@@ -10,6 +10,7 @@ class SensorToMaster(Thread):
         super().__init__()
         self.connection = connection.UdpConnection(config)
         self.sensor_msg = {}
+        self.clock_change = None
 
     def read_sensor(self):
         return np.random.rand(3, 10).tolist()
@@ -25,7 +26,7 @@ class SensorToMaster(Thread):
             time.sleep(0.1)
             msg = {}
             msg['data'] = self.read_sensor()
-            msg['timestamp'] = time.time()*(10**6)
+            msg['timestamp'] = time.time()+self.clock_change
             self.send_data(msg)
             self.sensor_msg = msg
 

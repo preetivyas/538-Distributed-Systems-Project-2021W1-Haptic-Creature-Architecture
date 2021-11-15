@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x61\x63tuator_server.proto\x12\x0f\x61\x63tuator_server\"4\n\x07\x43ommand\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x16\n\x0emaster_command\x18\x02 \x01(\x01\"+\n\x06Status\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32P\n\x0e\x41\x63tuatorServer\x12>\n\x07\x65xecute\x12\x18.actuator_server.Command\x1a\x17.actuator_server.Status\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x61\x63tuator_server.proto\x12\x0f\x61\x63tuator_server\"4\n\x07\x43ommand\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x16\n\x0emaster_command\x18\x02 \x01(\x01\"+\n\x06Status\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\";\n\x10TimestampRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x14\n\x0csync_request\x18\x02 \x01(\x08\"\x1e\n\tTimestamp\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\"4\n\x0fTimestampChange\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06\x63hange\x18\x02 \x01(\x05\":\n\x15TimestampChangeStatus\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\xf2\x01\n\x0e\x41\x63tuatorServer\x12>\n\x07\x65xecute\x12\x18.actuator_server.Command\x1a\x17.actuator_server.Status\"\x00\x12L\n\tsync_init\x12!.actuator_server.TimestampRequest\x1a\x1a.actuator_server.Timestamp\"\x00\x12R\n\x04sync\x12 .actuator_server.TimestampChange\x1a&.actuator_server.TimestampChangeStatus\"\x00\x62\x06proto3'
 )
 
 
@@ -102,8 +102,161 @@ _STATUS = _descriptor.Descriptor(
   serialized_end=139,
 )
 
+
+_TIMESTAMPREQUEST = _descriptor.Descriptor(
+  name='TimestampRequest',
+  full_name='actuator_server.TimestampRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='actuator_server.TimestampRequest.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sync_request', full_name='actuator_server.TimestampRequest.sync_request', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=141,
+  serialized_end=200,
+)
+
+
+_TIMESTAMP = _descriptor.Descriptor(
+  name='Timestamp',
+  full_name='actuator_server.Timestamp',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='actuator_server.Timestamp.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=202,
+  serialized_end=232,
+)
+
+
+_TIMESTAMPCHANGE = _descriptor.Descriptor(
+  name='TimestampChange',
+  full_name='actuator_server.TimestampChange',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='actuator_server.TimestampChange.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='change', full_name='actuator_server.TimestampChange.change', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=234,
+  serialized_end=286,
+)
+
+
+_TIMESTAMPCHANGESTATUS = _descriptor.Descriptor(
+  name='TimestampChangeStatus',
+  full_name='actuator_server.TimestampChangeStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='actuator_server.TimestampChangeStatus.timestamp', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='actuator_server.TimestampChangeStatus.status', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=288,
+  serialized_end=346,
+)
+
 DESCRIPTOR.message_types_by_name['Command'] = _COMMAND
 DESCRIPTOR.message_types_by_name['Status'] = _STATUS
+DESCRIPTOR.message_types_by_name['TimestampRequest'] = _TIMESTAMPREQUEST
+DESCRIPTOR.message_types_by_name['Timestamp'] = _TIMESTAMP
+DESCRIPTOR.message_types_by_name['TimestampChange'] = _TIMESTAMPCHANGE
+DESCRIPTOR.message_types_by_name['TimestampChangeStatus'] = _TIMESTAMPCHANGESTATUS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Command = _reflection.GeneratedProtocolMessageType('Command', (_message.Message,), {
@@ -120,6 +273,34 @@ Status = _reflection.GeneratedProtocolMessageType('Status', (_message.Message,),
   })
 _sym_db.RegisterMessage(Status)
 
+TimestampRequest = _reflection.GeneratedProtocolMessageType('TimestampRequest', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPREQUEST,
+  '__module__' : 'actuator_server_pb2'
+  # @@protoc_insertion_point(class_scope:actuator_server.TimestampRequest)
+  })
+_sym_db.RegisterMessage(TimestampRequest)
+
+Timestamp = _reflection.GeneratedProtocolMessageType('Timestamp', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMP,
+  '__module__' : 'actuator_server_pb2'
+  # @@protoc_insertion_point(class_scope:actuator_server.Timestamp)
+  })
+_sym_db.RegisterMessage(Timestamp)
+
+TimestampChange = _reflection.GeneratedProtocolMessageType('TimestampChange', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPCHANGE,
+  '__module__' : 'actuator_server_pb2'
+  # @@protoc_insertion_point(class_scope:actuator_server.TimestampChange)
+  })
+_sym_db.RegisterMessage(TimestampChange)
+
+TimestampChangeStatus = _reflection.GeneratedProtocolMessageType('TimestampChangeStatus', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPCHANGESTATUS,
+  '__module__' : 'actuator_server_pb2'
+  # @@protoc_insertion_point(class_scope:actuator_server.TimestampChangeStatus)
+  })
+_sym_db.RegisterMessage(TimestampChangeStatus)
+
 
 
 _ACTUATORSERVER = _descriptor.ServiceDescriptor(
@@ -129,8 +310,8 @@ _ACTUATORSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=141,
-  serialized_end=221,
+  serialized_start=349,
+  serialized_end=591,
   methods=[
   _descriptor.MethodDescriptor(
     name='execute',
@@ -139,6 +320,26 @@ _ACTUATORSERVER = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_COMMAND,
     output_type=_STATUS,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='sync_init',
+    full_name='actuator_server.ActuatorServer.sync_init',
+    index=1,
+    containing_service=None,
+    input_type=_TIMESTAMPREQUEST,
+    output_type=_TIMESTAMP,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='sync',
+    full_name='actuator_server.ActuatorServer.sync',
+    index=2,
+    containing_service=None,
+    input_type=_TIMESTAMPCHANGE,
+    output_type=_TIMESTAMPCHANGESTATUS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

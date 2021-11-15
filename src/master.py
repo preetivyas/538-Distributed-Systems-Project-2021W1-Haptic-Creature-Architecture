@@ -1,5 +1,7 @@
 from multiprocessing import Process
 from concurrent import futures
+
+from numpy.lib.function_base import diff
 import connection
 import pickle
 from threading import Thread
@@ -30,27 +32,41 @@ class MasterToSensor(Thread):
                 self.connection.connect()
 
 
-#handling data from other master servers
+#facilitating sensor data for other master
 class MasterServicer(master_server_pb2_grpc.MasterServerServicer):
 
     def __init__(self):
-        self.sensor_msgs = None
+        self.sensor_msgs = None #dictionary keyed by name of the sensor
+        self.clock_change = None
 
     def get_sensor_data(self, request, context):
-
         sensor_name = request.name
-        data = self.sensor_msgs[sensor_name] 
-        sensor_proto = master_server_pb2.SensorData()
+        data = self.sensor_msgs[sensor_name] #get the latest data from the sensor
         data_array = np.array(data)
 
-        #PV: didn't quite understand the proto part
-        sensor_proto.timestamp = time.time()
+        sensor_proto = master_server_pb2.SensorData() #instance of proto object
+
+        sensor_proto.timestamp = time.time()*(10**6)+ self.clock_change
         sensor_proto.row_number = data_array.shape[1]
         sensor_proto.col_number = data_array.shape[0]
 
         data_flat = data_array.flatten().tolist()
         sensor_proto.sensor_data.extend(data_flat)
         return sensor_proto
+
+    def execute_sync_init (self, request, context):
+        if request.sync_request: #sync_request message is true then return the current time stampe
+            timestamp_sync = time.time()*(10**6)+ self.clock_change
+            return master_server_pb2.Timestamp(timestamp=timestamp_sync)
+        else:
+            return master_server_pb2.Timestamp(timestamp=None)        
+
+    def execute_sync (self, request, context):
+        self.clock_change  = request.change
+        #PV:  self.master_timesync_msg will be added to all timestamp values
+        status = True
+        return master_server_pb2.TimestampChangeStatus(status=status)
+        
 
 
 class MasterToMaster(Thread):
@@ -67,12 +83,12 @@ class MasterToMaster(Thread):
 
         their_address = config['their_ip'] + ":" + config['their_port']
         channel = grpc.insecure_channel(their_address)
-        self.proxy = master_server_pb2_grpc.MasterServerStub(channel)
+        self.proxy = master_server_pb2_grpc.MasterServerStub(channel) #setting up a client so we can use the sensor on other master
 
     def run(self):
         self.connection.connect()
-        self.master_thread.start()
-        self.master_thread.wait_for_termination()
+        self.master_server.start()
+        self.master_server.wait_for_termination()
         while True:
             time.sleep(0.1)
 
@@ -86,6 +102,19 @@ class Master(Process):
         self.other_master_threads = {}
         self.config = config
         self.other_master_present = False
+
+        self.clock_change = None #local master's clock change
+        
+        if config['Time_head']['time_head']: #if master is time head that updates the time periodically
+            self.clock_change = None #the value by which clock changes on all actuator and sensor node
+            self.clock_time_diff = {}
+            self.clock_node = {}
+            self.clock_sync_start_time = time.time()*(10**6) #current timer flag for counting
+            self.clock_sync_update = config['Time_head']['count'] #time within which the clock synchronizes 
+            self.time_head=True
+
+#think about how this class behaves in time head or other mode
+
         for connection_type, connection_config in config.items():
             name = connection_config['name']
             if 'Udp' in connection_type:
@@ -96,6 +125,8 @@ class Master(Process):
                     self.other_master_threads[name] = MasterToMaster(connection_config)
                 else:
                     self.actuator_clients[name] = ActuatorClient(connection_config)
+
+
 
     def read_model(self, path):
         self.model = pickle.load(path) # placeholder
@@ -126,6 +157,7 @@ class Master(Process):
         sensor_msg['data'] = data.tolist()
         return sensor_msg
 
+
     def run(self):
         
         # self.read_model(self.config['model_path'])
@@ -133,6 +165,7 @@ class Master(Process):
             sensor.start()
         for name, master in self.other_master_threads.items():
             master.start()
+
         while True:
             time.sleep(0.1)
             sensor_msgs = {}
@@ -142,18 +175,62 @@ class Master(Process):
                 sensor_msgs[name] = sensors.sensor_msg
 
             if self.other_master_present:
-                for other_master_name, master in self.other_master_threads.items():
-                    master.master_servicer.sensor_msgs = sensor_msgs
+                for other_master_name, master in self.other_master_threads.items(): #iterate through master connections
+                    master.master_servicer.sensor_msgs = sensor_msgs #update master servicer with latest sensor message
 
-                    for sensor_name, sensor in self.sensor_threads.items():
+                    for sensor_name, sensor in self.sensor_threads.items(): #iterating through no of sensors; assuming same type of sensors
                         sensor_of_interest = other_master_name + '_' + sensor_name
                         sensor_name_msg = master_server_pb2.SensorName(name=sensor_name)
-                        sensor_of_interest_proto = master.proxy.get_sensor_data(sensor_name_msg)
-                        other_sensor_msgs[sensor_of_interest] = self.parse_sensor_protobuf(sensor_of_interest_proto)
+                        sensor_of_interest_proto = master.proxy.get_sensor_data(sensor_name_msg) #PV: similar for sync calls 
+                        other_sensor_msgs[sensor_of_interest] = self.parse_sensor_protobuf(sensor_of_interest_proto) #building a dictionary of other sensor messages
             # responses = self.compute_response(sensor_msgs, other_sensor_msgs)
             responses = [1, 1, 1, 1]
 
             for name, actuator in self.actuator_clients.items():
                 response = responses[name]
-                timestamp = time.time() * (10**6)
-                actuator.perform(timestamp, response)
+                timestamp = time.time()*(10**6) + self.clock_change
+                actuator.perform_command(timestamp, response)
+
+            #---------------------TIME SYNC -------------------------
+
+            if self.time_head: #if master is time head that updates the time periodically
+                if (time.time()*(10**6)-self.clock_sync_start_time) < self.clock_sync_update:
+                
+                #-------------initiate sync process: ask everyone to send their clock-----------
+                     for name, actuator in self.actuator_clients.items():
+                          timestamp = time.time()*(10**6) + self.clock_change
+                          sync_request = True
+                          self.clock_node[name] = actuator.perform_sync_init(timestamp,sync_request) #we get node timestamp 
+                          self.clock_time_diff[name] = self.clock_node[name]  - time.time()*(10**6)
+                     
+                    #  for name, sensors in self.sensor_threads.items():  
+                         #TODO: update this
+                         #send message to sensor
+                         #wait for message from sensor 
+                         # self.clock_node[name] = xx
+                         # self.clock_time_diff[name] = xx
+
+                    #TODO: update this
+                    #  for master in masters list:
+                    #       timestamp = time.time()*(10**6) + self.clock_change
+                    #       sync_request = True
+                    #       self.clock_node[name] = master.perform_sync_init(timestamp,sync_request)
+                    #       self.clock_time_diff[name] = self.clock_node[name]  - time.time()*(10**6)
+                  
+                  #--------calculate delta------------
+
+                   #TODO: update this
+                   # if clocks received from all:
+                   #      self.clock_change = average of clock time difference
+
+                   #--------sending clock change value on each node-------
+                    
+                    #TODO: update this
+                     for name, actuator in self.actuator_clients.items():
+                         timestamp = time.time()*(10**6) + self.clock_change
+                         self.clock_update[name] = actuator.perform_sync(timestamp, change= self.clock_change ) #we update node timestamp 
+                    
+                    #TODO: do the same for sensor nodes and master nodes
+                                 
+                else:
+                    self.clock_sync_start_time = time.time()*(10**6)

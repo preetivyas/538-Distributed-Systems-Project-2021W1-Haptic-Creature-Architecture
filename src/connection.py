@@ -161,7 +161,7 @@ class SerialConnection(BaseConnection):
     def connect(self):
         while(self.connected == False):
             try:
-                self.connection = serial.Serial(self.port, self.baud_rate, timeout=time_out)
+                self.connection = serial.Serial(self.port, self.baud_rate, timeout=self.timeout)
                 self.connected = True
             except:
                 time.sleep(0.5)
