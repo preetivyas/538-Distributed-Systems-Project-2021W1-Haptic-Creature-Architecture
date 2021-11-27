@@ -7,6 +7,8 @@ package actuator_server;
 service ActuatorServer {
 
   rpc execute(Command) returns (Status) {}
+  rpc sync_init(TimestampRequest) returns (Timestamp) {}
+  rpc sync(TimestampChange) returns (TimestampChangeStatus) {}
 
 }
 
@@ -16,6 +18,26 @@ message Command {
 }
 
 message Status {
+  int32 timestamp = 1;
+  bool status = 2;
+}
+
+
+message TimestampRequest {
+  int32 timestamp = 1;
+  bool sync_request = 2;
+}
+
+message Timestamp {
+  int32 timestamp = 1;
+}
+
+message TimestampChange {
+  int32 timestamp = 1;
+  int32 change = 2;
+}
+
+message TimestampChangeStatus {
   int32 timestamp = 1;
   bool status = 2;
 }

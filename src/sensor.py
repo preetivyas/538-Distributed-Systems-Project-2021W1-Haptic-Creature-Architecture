@@ -10,6 +10,7 @@ class SensorToMaster(Thread):
         super().__init__()
         self.connection = connection.UdpConnection(config)
         self.sensor_msg = {}
+        self.master_msg = {}
         self.clock_change = None
 
     def read_sensor(self):
@@ -18,7 +19,7 @@ class SensorToMaster(Thread):
     # preprocess and send data
     def send_data(self,msg):
         msg_bytes = pickle.dumps(msg)
-        self.master_connection.send(msg_bytes)
+        self.connection.send(msg_bytes)
 
     def run(self):
         self.connection.connect()
@@ -30,6 +31,19 @@ class SensorToMaster(Thread):
             self.send_data(msg)
             self.sensor_msg = msg
 
+            success, msg_bytes = self.connection.receive()
+            if success:
+                msg_receive = pickle.loads(msg_bytes)
+                self.master_msg = msg_receive
+
+            if msg_receive['data'] == "initiate_time_sync":
+                 msg['data'] = "node_timestamp"
+                 msg['timestamp'] = time.time()+self.clock_change
+                 self.send_data(msg)
+
+            if msg_receive['data'] == "clock_change":
+                 self.clock_change = msg_receive['time_change']
+               
 
 class Sensor(Process):
     def __init__(self, config):
@@ -37,6 +51,7 @@ class Sensor(Process):
         self.config = config
         self.master_thread = None
         self.actuator_connections  = {}
+        self.clock_change = None
         
         for connection_type, connection_config in config.items():
             name = connection_config['name']
@@ -62,10 +77,11 @@ class Sensor(Process):
        while True:
             time.sleep(0.1)
             sensor_msg = self.master_thread.sensor_msg
+            clock_change = self.master_thread.clock_change
             for name, connection in self.actuator_connections.items():
                 msg = {}
                 msg['data'] = self.compute_response(name, sensor_msg)
-                msg['timestamp'] = time.time()*(10**6)
+                msg['timestamp'] = time.time()*(10**6)+clock_change
                 msg_bytes = pickle.dumps(msg)
                 status = connection.send(msg_bytes)
 

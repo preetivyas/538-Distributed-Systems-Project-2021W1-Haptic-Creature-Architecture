@@ -19,15 +19,48 @@ class MasterToSensor(Thread):
         super().__init__()
         self.connection = connection.UdpConnection(config)
         self.sensor_msg = {}
+        self.master_msg = {}
+        self.time_stamp = None
+        self.time_sync = False #flag if true initiates time sync code
+        self.time_change = False #flag is true sends clock_change to sensors
+        self.clock_change = None #update for each node 
+        self.clock_node = None #clock of the sensor node
+
+    # preprocess and send data
+    def send_data(self,msg):
+        msg_bytes = pickle.dumps(msg)
+        self.connection.send(msg_bytes)
 
     def run(self):
         self.connection.connect()
         while True:
             time.sleep(0.1)
             success, msg_bytes = self.connection.receive()
+            msg_send = {}
             if success:
                 msg = pickle.loads(msg_bytes)
                 self.sensor_msg = msg
+
+                if msg['data'] == "node_timestamp":
+                    # save timestamp
+                    self.time_sync = False
+                    self.clock_node = msg ['timestamp']
+
+                if self.time_sync: #if this is true send time_sync message
+                    msg_send['data'] = "initiate_time_sync"
+                    msg_send['timestamp'] =  time.time()*(10**6)+self.clock_change #PV note: this should be specific to the node
+                    self.send_data(msg_send)
+                    self.master_msg = msg_send
+                    #assuming message delivered in one go
+
+                if self.time_change: 
+                    msg_send['data'] = "clock_change"
+                    msg_send['time_change'] = self.clock_change
+                    msg_send['timestamp'] =  time.time()*(10**6)+self.clock_change
+                    self.send_data(msg_send)
+                    self.master_msg = msg_send
+                    self.time_change = False
+
             else:
                 self.connection.connect()
 
@@ -102,16 +135,16 @@ class Master(Process):
         self.other_master_threads = {}
         self.config = config
         self.other_master_present = False
-
         self.clock_change = None #local master's clock change
-        
+                  
         if config['Time_head']['time_head']: #if master is time head that updates the time periodically
             self.clock_change = None #the value by which clock changes on all actuator and sensor node
-            self.clock_time_diff = {}
-            self.clock_node = {}
+            self.clock_time_diff = {} #difference between timestampl for each node, should be an array
+            self.clock_node = {} #extracted timestamp of the node
             self.clock_sync_start_time = time.time()*(10**6) #current timer flag for counting
             self.clock_sync_update = config['Time_head']['count'] #time within which the clock synchronizes 
-            self.time_head=True
+            self.time_head=True #says that this master is time head
+            self.sync_time = None  #sync time bool flag: syncing or not syncing 
 
 #think about how this class behaves in time head or other mode
 
@@ -191,46 +224,43 @@ class Master(Process):
                 timestamp = time.time()*(10**6) + self.clock_change
                 actuator.perform_command(timestamp, response)
 
-            #---------------------TIME SYNC -------------------------
+            #---------------------TIME SYNC ------------------------
 
             if self.time_head: #if master is time head that updates the time periodically
+
                 if (time.time()*(10**6)-self.clock_sync_start_time) < self.clock_sync_update:
-                
+                     total_active_nodes = len(self.actuator_clients)+len(self.sensor_threads)+len(self.other_master_threads)
+                     sync_request = True
+
                 #-------------initiate sync process: ask everyone to send their clock-----------
                      for name, actuator in self.actuator_clients.items():
-                          timestamp = time.time()*(10**6) + self.clock_change
-                          sync_request = True
-                          self.clock_node[name] = actuator.perform_sync_init(timestamp,sync_request) #we get node timestamp 
-                          self.clock_time_diff[name] = self.clock_node[name]  - time.time()*(10**6)
+                          self.clock_node[name] = actuator.perform_sync_init(time.time()*(10**6) + self.clock_change,sync_request) #we get node timestamp 
+                          self.clock_time_diff[name] =  time.time()*(10**6) - self.clock_node[name]
                      
-                    #  for name, sensors in self.sensor_threads.items():  
-                         #TODO: update this
-                         #send message to sensor
-                         #wait for message from sensor 
-                         # self.clock_node[name] = xx
-                         # self.clock_time_diff[name] = xx
-
-                    #TODO: update this
-                    #  for master in masters list:
-                    #       timestamp = time.time()*(10**6) + self.clock_change
-                    #       sync_request = True
-                    #       self.clock_node[name] = master.perform_sync_init(timestamp,sync_request)
-                    #       self.clock_time_diff[name] = self.clock_node[name]  - time.time()*(10**6)
+                     for name, sensors in self.sensor_threads.items():  
+                         sensors.time_sync = True #this initiate the send loop in MastertoSensor thread
+                         self.clock_node[name] = sensors.clock_node #assuming 
+                         self.clock_time_diff[name] =  time.time()*(10**6) - self.clock_node[name]
+                
+                     for other_master_name, master in self.other_master_threads.items():
+                         self.clock_node[name] = master.perform_sync_init(time.time()*(10**6) + self.clock_change,sync_request)
+                         self.clock_time_diff[name] =  time.time()*(10**6) - self.clock_node[name]
                   
-                  #--------calculate delta------------
-
-                   #TODO: update this
-                   # if clocks received from all:
-                   #      self.clock_change = average of clock time difference
+                    #--------calculate delta------------
+                     if len(self.clock_time_diff) == total_active_nodes:
+                         clock_diff_values = [item for _, item in self.clock_time_diff.items() if item != 0]
+                         self.clock_change = sum(clock_diff_values) / len(clock_diff_values)
 
                    #--------sending clock change value on each node-------
-                    
-                    #TODO: update this
                      for name, actuator in self.actuator_clients.items():
-                         timestamp = time.time()*(10**6) + self.clock_change
-                         self.clock_update[name] = actuator.perform_sync(timestamp, change= self.clock_change ) #we update node timestamp 
+                         self.clock_update[name] = actuator.perform_sync(time.time()*(10**6) + self.clock_change, self.clock_change ) #we update node timestamp 
                     
-                    #TODO: do the same for sensor nodes and master nodes
-                                 
+                     for name, sensors in self.sensor_threads.items():  
+                         sensors.clock_change = self.clock_change
+                         sensors.time_change =  True
+                    
+                     for other_master_name, master in self.other_master_threads.items():
+                         self.clock_update[name] = master.perform_sync(time.time()*(10**6) + self.clock_change, self.clock_change )
+                    
                 else:
                     self.clock_sync_start_time = time.time()*(10**6)

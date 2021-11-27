@@ -7,7 +7,9 @@ package master_server;
 service MasterServer {
 
   rpc get_sensor_data(SensorName) returns (SensorData) {}
-
+  rpc sync_init(TimestampRequest) returns (Timestamp) {}
+  rpc sync(TimestampChange) returns (TimestampChangeStatus) {}
+  
 }
 
 message SensorName {
@@ -19,4 +21,24 @@ message SensorData {
   int32 row_number = 2;
   int32 col_number = 3;
   repeated double sensor_data = 4;
+}
+
+
+message TimestampRequest {
+  int32 timestamp = 1;
+  bool sync_request = 2;
+}
+
+message Timestamp {
+  int32 timestamp = 1;
+}
+
+message TimestampChange {
+  int32 timestamp = 1;
+  int32 change = 2;
+}
+
+message TimestampChangeStatus {
+  int32 timestamp = 1;
+  bool status = 2;
 }
