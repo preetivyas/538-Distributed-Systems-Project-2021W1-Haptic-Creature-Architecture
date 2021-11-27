@@ -11,7 +11,7 @@ class SensorToMaster(Thread):
         self.connection = connection.UdpConnection(config)
         self.sensor_msg = {}
         self.master_msg = {}
-        self.clock_change = None
+        self.clock_change = 0.0
 
     def read_sensor(self):
         return np.random.rand(3, 10).tolist()
@@ -36,13 +36,13 @@ class SensorToMaster(Thread):
                 msg_receive = pickle.loads(msg_bytes)
                 self.master_msg = msg_receive
 
-            if msg_receive['data'] == "initiate_time_sync":
-                 msg['data'] = "node_timestamp"
-                 msg['timestamp'] = time.time()+self.clock_change
-                 self.send_data(msg)
+                if msg_receive['data'] == "initiate_time_sync":
+                     msg['data'] = "node_timestamp"
+                     msg['timestamp'] = time.time()+self.clock_change
+                     self.send_data(msg)
 
-            if msg_receive['data'] == "clock_change":
-                 self.clock_change = msg_receive['time_change']
+                if msg_receive['data'] == "clock_change":
+                     self.clock_change = msg_receive['time_change']
                
 
 class Sensor(Process):
@@ -51,17 +51,18 @@ class Sensor(Process):
         self.config = config
         self.master_thread = None
         self.actuator_connections  = {}
-        self.clock_change = None
+        self.clock_change = 0.0
         
         for connection_type, connection_config in config.items():
-            name = connection_config['name']
             if 'Udp' in connection_type:
                 self.master_thread = SensorToMaster(connection_config)
+                self.master_thread.daemon = True
             if 'Serial' in connection_type:
+                name = connection_config['name']
                 self.actuator_connections[name] = connection.SerialConnection(connection_config)
 
-    def compute_response(self, name, msg):
-        if name == 'actuator_1' and max(msg['data']) >= 1:
+    def compute_response(self, name, data):
+        if name == 'actuator_1' and max(data) >= 1:
             response = 1
         else:
             response = 0
@@ -76,12 +77,12 @@ class Sensor(Process):
 
        while True:
             time.sleep(0.1)
-            sensor_msg = self.master_thread.sensor_msg
+            sensor_data = self.master_thread.read_sensor()
             clock_change = self.master_thread.clock_change
             for name, connection in self.actuator_connections.items():
                 msg = {}
-                msg['data'] = self.compute_response(name, sensor_msg)
+                msg['data'] = self.compute_response(name, sensor_data)
                 msg['timestamp'] = time.time()*(10**6)+clock_change
                 msg_bytes = pickle.dumps(msg)
-                status = connection.send(msg_bytes)
+                connection.send(msg_bytes)
 

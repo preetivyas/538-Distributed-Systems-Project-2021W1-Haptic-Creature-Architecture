@@ -100,7 +100,7 @@ class UdpConnection(BaseConnection):
         self.ip = self.config['ip']
         self.port = int(self.config['port'])
         self.buffer_size = int(self.config['buffer_size'])
-        self.timeout = self.config['timeout']
+        self.timeout = int(self.config['timeout'])
         self.address = None
 
     def connect(self):
@@ -112,10 +112,10 @@ class UdpConnection(BaseConnection):
                 if self.role == 'server':
                     self.socket.bind((self.ip, self.port))
                     self.connected = True
-                    print('Udp server connected to: ', self.address)
                 elif self.role == 'client':
                     self.address = (self.ip, self.port)
                     self.connected = True
+                    print('Udp connected to: ', self.address)
                 else:
                     raise ValueError('Unrecognized role: Choose either server or client')
             except ValueError:
@@ -125,13 +125,9 @@ class UdpConnection(BaseConnection):
                 continue
 
     def send(self, data):
-        if self.connect == True:
-            if self.address == None:
-                _, self.address = self.socket.recvfrom(self.buffer_size)
-            self.socket.sendto(data, self.address)
-            return True
-        else:
-            return False
+        if self.address == None:
+            _, self.address = self.socket.recvfrom(self.buffer_size)
+        self.socket.sendto(data, self.address)
 
     def receive(self):
         try:
@@ -156,28 +152,26 @@ class SerialConnection(BaseConnection):
         self.port = self.config['port']
         self.baud_rate = int(self.config['baudrate'])
         self.buffer_size = int(self.config['buffer_size'])
-        self.timeout = self.config['timeout']
+        self.timeout = int(self.config['timeout'])
 
     def connect(self):
         while(self.connected == False):
             try:
-                self.connection = serial.Serial(self.port, self.baud_rate, timeout=self.timeout)
+                self.connection = serial.Serial(port=self.port, baudrate=self.baud_rate, timeout=self.timeout)
+                if(self.connection.isOpen() == False):
+                    self.connection.open()
                 self.connected = True
-            except:
+            except Exception as e:
+                print('Serial Open Error: ', e)
                 time.sleep(0.5)
-                print('Serial open error')
                 continue
 
     def send(self, data):
-        if self.connect == True:
-            self.connection.write(data)
-            return True
-        else:
-            return False
+        self.connection.write(data)
 
     def receive(self):
         try:
-            receive_data = self.connection.readline(self.buffer_size)
+            receive_data = self.connection.read(self.buffer_size)
             return True, receive_data
         except serial.SerialTimeoutException:
             self.connected = False

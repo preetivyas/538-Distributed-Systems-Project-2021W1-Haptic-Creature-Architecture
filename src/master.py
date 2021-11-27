@@ -23,8 +23,8 @@ class MasterToSensor(Thread):
         self.time_stamp = None
         self.time_sync = False #flag if true initiates time sync code
         self.time_change = False #flag is true sends clock_change to sensors
-        self.clock_change = None #update for each node 
-        self.clock_node = None #clock of the sensor node
+        self.clock_change = 0.0 #update for each node 
+        self.clock_node = 0.0 #clock of the sensor node
 
     # preprocess and send data
     def send_data(self,msg):
@@ -70,7 +70,7 @@ class MasterServicer(master_server_pb2_grpc.MasterServerServicer):
 
     def __init__(self):
         self.sensor_msgs = None #dictionary keyed by name of the sensor
-        self.clock_change = None
+        self.clock_change = 0.0
 
     def get_sensor_data(self, request, context):
         sensor_name = request.name
@@ -119,7 +119,6 @@ class MasterToMaster(Thread):
         self.proxy = master_server_pb2_grpc.MasterServerStub(channel) #setting up a client so we can use the sensor on other master
 
     def run(self):
-        self.connection.connect()
         self.master_server.start()
         self.master_server.wait_for_termination()
         while True:
@@ -136,29 +135,32 @@ class Master(Process):
         self.config = config
         self.other_master_present = False
         self.clock_change = None #local master's clock change
-                  
+        
         if config['Time_head']['time_head']: #if master is time head that updates the time periodically
             self.clock_change = None #the value by which clock changes on all actuator and sensor node
             self.clock_time_diff = {} #difference between timestampl for each node, should be an array
             self.clock_node = {} #extracted timestamp of the node
             self.clock_sync_start_time = time.time()*(10**6) #current timer flag for counting
-            self.clock_sync_update = config['Time_head']['count'] #time within which the clock synchronizes 
+            self.clock_sync_update = int(config['Time_head']['count']) #time within which the clock synchronizes 
             self.time_head=True #says that this master is time head
             self.sync_time = None  #sync time bool flag: syncing or not syncing 
 
 #think about how this class behaves in time head or other mode
 
         for connection_type, connection_config in config.items():
-            name = connection_config['name']
             if 'Udp' in connection_type:
+                name = connection_config['name']
                 self.sensor_threads[name] = MasterToSensor(connection_config)
+                self.sensor_threads[name].daemon = True
             if 'Rpc' in connection_type:
+                name = connection_config['name']
                 if 'master' in name:
                     self.other_master_present = True
                     self.other_master_threads[name] = MasterToMaster(connection_config)
+                    self.other_master_threads[name].daemon = True
                 else:
                     self.actuator_clients[name] = ActuatorClient(connection_config)
-
+                    self.actuator_clients[name].daemon = True
 
 
     def read_model(self, path):
@@ -206,6 +208,7 @@ class Master(Process):
 
             for name, sensors in self.sensor_threads.items():
                 sensor_msgs[name] = sensors.sensor_msg
+                print(name, sensors.sensor_msg)
 
             if self.other_master_present:
                 for other_master_name, master in self.other_master_threads.items(): #iterate through master connections
@@ -247,7 +250,7 @@ class Master(Process):
                          self.clock_time_diff[name] =  time.time()*(10**6) - self.clock_node[name]
                   
                     #--------calculate delta------------
-                     if len(self.clock_time_diff) == total_active_nodes:
+                     if len(self.clock_time_diff) == total_active_nodes and total_active_nodes != 0:
                          clock_diff_values = [item for _, item in self.clock_time_diff.items() if item != 0]
                          self.clock_change = sum(clock_diff_values) / len(clock_diff_values)
 

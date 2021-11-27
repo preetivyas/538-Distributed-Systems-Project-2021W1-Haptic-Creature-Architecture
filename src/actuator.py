@@ -37,7 +37,7 @@ class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
     def __init__(self):
         self.master_command_msg = {}
         self.master_timechange_msg = None
-        self.clock_change = None
+        self.clock_change = 0.0
 
     def execute_command(self, request, context):
 
@@ -56,7 +56,7 @@ class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
             timestamp_sync = time.time()*(10**6)+ self.clock_change
             return actuator_server_pb2.Timestamp(timestamp=timestamp_sync)
         else:
-            return actuator_server_pb2.Timestamp(timestamp=None)        
+            return actuator_server_pb2.Timestamp(timestamp=0.0)        
 
     def execute_sync (self, request, context):
         self.clock_change  = request.change
@@ -69,7 +69,7 @@ class ActuatorToSensor(Thread):
     def __init__(self, config):
         super().__init__()
         self.connection = connection.SerialConnection(config)
-        self.sensor_msg = {}
+        self.sensor_msg = None
 
     def run(self):
         self.connection.connect()
@@ -77,8 +77,9 @@ class ActuatorToSensor(Thread):
             time.sleep(0.1)
             success, msg_bytes = self.connection.receive()
             if success:
-                msg = pickle.loads(msg_bytes)
-                self.sensor_msg = msg
+                if len(msg_bytes) != 0:
+                    msg = pickle.loads(msg_bytes)
+                    self.sensor_msg = msg
             else:
                 self.connection.connect()
 
@@ -87,9 +88,9 @@ class Actuator(Process):
         super().__init__()
         self.config = config
         self.master_thread = None
+        self.default_command = 0.0
         self.sensor_threads = {}
         for connection_type, connection_config in config.items():
-            name = connection_config['name']
             if 'Rpc' in connection_type:
                 self.master_thread = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
                 self.master_servicer = ActuatorServicer()
@@ -98,7 +99,9 @@ class Actuator(Process):
                 address = config['ip'] + ':' + config['port']
                 self.master_thread.add_insecure_port(address)
             if 'Serial' in connection_type:
+                name = connection_config['name']
                 self.sensor_threads[name] = ActuatorToSensor(connection_config)
+                self.sensor_threads[name].daemon = True
 
     def run(self):
         if self.master_thread:
@@ -108,19 +111,24 @@ class Actuator(Process):
             for name, thread in self.sensor_threads.items():
                 thread.start()
 
+        master_timestamp = time.time()*10**6
+
         while True:
             time.sleep(0.1)
+            master_command = self.default_command
             sensor_msgs = {}
             sensor_timestamps = {}
             sensor_commands = {}
             for name, sensors in self.sensor_threads.items():
-                sensor_msgs[name] = sensors.sensor_msg
-                sensor_timestamps[name] = sensors.sensor_msg['timestamp']
-                sensor_commands[name] = sensors.sensor_msg['data']
+                if sensors.sensor_msg != None:
+                    sensor_msgs[name] = sensors.sensor_msg
+                    sensor_timestamps[name] = sensors.sensor_msg['timestamp']
+                    sensor_commands[name] = sensors.sensor_msg['data']
 
-            master_command_msg = self.master_servicer.master_command_msg
-            master_timestamp = master_command_msg['master_timestamp']
-            master_command = master_command_msg['data']
+            if self.master_thread != None:
+                master_command_msg = self.master_servicer.master_command_msg
+                master_timestamp = master_command_msg['master_timestamp']
+                master_command = master_command_msg['data']
 
             use_master = True
             sensor_command = master_command
@@ -134,4 +142,4 @@ class Actuator(Process):
             else:
                 final_command = sensor_command
                 
-            print("performing command: ", final_command)
+            # print("performing command: ", final_command)
