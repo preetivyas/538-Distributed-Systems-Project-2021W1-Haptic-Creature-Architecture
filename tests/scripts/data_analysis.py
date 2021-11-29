@@ -40,7 +40,7 @@ delays = delays[20:]
 delay_max = np.max(delays)
 delay_sorted = np.sort(delays, axis=None)
 delay_normalized = delay_sorted/(delay_sorted).sum()
-delay_cdf = np.cumsum(delay_normalized)
+delay_cdf = np.cumsum(delay_normalized) * 100
 
 # Compute the CDF
 ax.plot(delay_sorted, delay_cdf, 'o-', label='Delays CDF')
