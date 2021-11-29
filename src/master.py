@@ -140,6 +140,7 @@ class Master(Process):
         self.logFile_base = config['Log_file_address']['loc']+config['Node_name']['name']+'_'+time.strftime("%Y%m%d_%H%M%S_")
         print(self.logFile_base)
 
+
         if config['Time_head']['time_head']: #if master is time head that updates the time periodically
             self.clock_change = 0.0 #the value by which clock changes on all actuator and sensor node
             self.clock_time_diff = {} #difference between timestampl for each node, should be an array
