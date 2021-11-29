@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x61\x63tuator_server.proto\x12\x0f\x61\x63tuator_server\"4\n\x07\x43ommand\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x16\n\x0emaster_command\x18\x02 \x01(\x01\"+\n\x06Status\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\";\n\x10TimestampRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x14\n\x0csync_request\x18\x02 \x01(\x08\"\x1e\n\tTimestamp\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\"4\n\x0fTimestampChange\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06\x63hange\x18\x02 \x01(\x05\":\n\x15TimestampChangeStatus\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\xf2\x01\n\x0e\x41\x63tuatorServer\x12>\n\x07\x65xecute\x12\x18.actuator_server.Command\x1a\x17.actuator_server.Status\"\x00\x12L\n\tsync_init\x12!.actuator_server.TimestampRequest\x1a\x1a.actuator_server.Timestamp\"\x00\x12R\n\x04sync\x12 .actuator_server.TimestampChange\x1a&.actuator_server.TimestampChangeStatus\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x61\x63tuator_server.proto\x12\x0f\x61\x63tuator_server\"4\n\x07\x43ommand\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x16\n\x0emaster_command\x18\x02 \x01(\x01\"+\n\x06Status\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0e\n\x06status\x18\x02 \x01(\x08\";\n\x10TimestampRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x14\n\x0csync_request\x18\x02 \x01(\x08\"\x1e\n\tTimestamp\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\"4\n\x0fTimestampChange\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0e\n\x06\x63hange\x18\x02 \x01(\x03\":\n\x15TimestampChangeStatus\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\x8a\x02\n\x0e\x41\x63tuatorServer\x12\x46\n\x0f\x65xecute_command\x12\x18.actuator_server.Command\x1a\x17.actuator_server.Status\"\x00\x12T\n\x11\x65xecute_sync_init\x12!.actuator_server.TimestampRequest\x1a\x1a.actuator_server.Timestamp\"\x00\x12Z\n\x0c\x65xecute_sync\x12 .actuator_server.TimestampChange\x1a&.actuator_server.TimestampChangeStatus\"\x00\x62\x06proto3'
 )
 
 
@@ -35,7 +35,7 @@ _COMMAND = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='actuator_server.Command.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -74,7 +74,7 @@ _STATUS = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='actuator_server.Status.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -113,7 +113,7 @@ _TIMESTAMPREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='actuator_server.TimestampRequest.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -152,7 +152,7 @@ _TIMESTAMP = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='actuator_server.Timestamp.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -184,14 +184,14 @@ _TIMESTAMPCHANGE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='actuator_server.TimestampChange.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='change', full_name='actuator_server.TimestampChange.change', index=1,
-      number=2, type=5, cpp_type=1, label=1,
+      number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -223,7 +223,7 @@ _TIMESTAMPCHANGESTATUS = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='actuator_server.TimestampChangeStatus.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -311,11 +311,11 @@ _ACTUATORSERVER = _descriptor.ServiceDescriptor(
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
   serialized_start=349,
-  serialized_end=591,
+  serialized_end=615,
   methods=[
   _descriptor.MethodDescriptor(
-    name='execute',
-    full_name='actuator_server.ActuatorServer.execute',
+    name='execute_command',
+    full_name='actuator_server.ActuatorServer.execute_command',
     index=0,
     containing_service=None,
     input_type=_COMMAND,
@@ -324,8 +324,8 @@ _ACTUATORSERVER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='sync_init',
-    full_name='actuator_server.ActuatorServer.sync_init',
+    name='execute_sync_init',
+    full_name='actuator_server.ActuatorServer.execute_sync_init',
     index=1,
     containing_service=None,
     input_type=_TIMESTAMPREQUEST,
@@ -334,8 +334,8 @@ _ACTUATORSERVER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='sync',
-    full_name='actuator_server.ActuatorServer.sync',
+    name='execute_sync',
+    full_name='actuator_server.ActuatorServer.execute_sync',
     index=2,
     containing_service=None,
     input_type=_TIMESTAMPCHANGE,

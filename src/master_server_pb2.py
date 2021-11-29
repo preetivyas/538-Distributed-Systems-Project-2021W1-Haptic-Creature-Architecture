@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13master_server.proto\x12\rmaster_server\"\x1a\n\nSensorName\x12\x0c\n\x04name\x18\x01 \x01(\t\"\\\n\nSensorData\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x12\n\nrow_number\x18\x02 \x01(\x05\x12\x12\n\ncol_number\x18\x03 \x01(\x05\x12\x13\n\x0bsensor_data\x18\x04 \x03(\x01\";\n\x10TimestampRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x14\n\x0csync_request\x18\x02 \x01(\x08\"\x1e\n\tTimestamp\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\"4\n\x0fTimestampChange\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06\x63hange\x18\x02 \x01(\x05\":\n\x15TimestampChangeStatus\x12\x11\n\ttimestamp\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\xf3\x01\n\x0cMasterServer\x12I\n\x0fget_sensor_data\x12\x19.master_server.SensorName\x1a\x19.master_server.SensorData\"\x00\x12H\n\tsync_init\x12\x1f.master_server.TimestampRequest\x1a\x18.master_server.Timestamp\"\x00\x12N\n\x04sync\x12\x1e.master_server.TimestampChange\x1a$.master_server.TimestampChangeStatus\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x13master_server.proto\x12\rmaster_server\"\x1a\n\nSensorName\x12\x0c\n\x04name\x18\x01 \x01(\t\"\\\n\nSensorData\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x12\n\nrow_number\x18\x02 \x01(\x05\x12\x12\n\ncol_number\x18\x03 \x01(\x05\x12\x13\n\x0bsensor_data\x18\x04 \x03(\x01\";\n\x10TimestampRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x14\n\x0csync_request\x18\x02 \x01(\x08\"\x1e\n\tTimestamp\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\"4\n\x0fTimestampChange\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0e\n\x06\x63hange\x18\x02 \x01(\x05\":\n\x15TimestampChangeStatus\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\x83\x02\n\x0cMasterServer\x12I\n\x0fget_sensor_data\x12\x19.master_server.SensorName\x1a\x19.master_server.SensorData\"\x00\x12P\n\x11\x65xecute_sync_init\x12\x1f.master_server.TimestampRequest\x1a\x18.master_server.Timestamp\"\x00\x12V\n\x0c\x65xecute_sync\x12\x1e.master_server.TimestampChange\x1a$.master_server.TimestampChangeStatus\"\x00\x62\x06proto3'
 )
 
 
@@ -67,7 +67,7 @@ _SENSORDATA = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='master_server.SensorData.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -120,7 +120,7 @@ _TIMESTAMPREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='master_server.TimestampRequest.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -159,7 +159,7 @@ _TIMESTAMP = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='master_server.Timestamp.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -191,7 +191,7 @@ _TIMESTAMPCHANGE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='master_server.TimestampChange.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -230,7 +230,7 @@ _TIMESTAMPCHANGESTATUS = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='master_server.TimestampChangeStatus.timestamp', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -318,7 +318,7 @@ _MASTERSERVER = _descriptor.ServiceDescriptor(
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
   serialized_start=368,
-  serialized_end=611,
+  serialized_end=627,
   methods=[
   _descriptor.MethodDescriptor(
     name='get_sensor_data',
@@ -331,8 +331,8 @@ _MASTERSERVER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='sync_init',
-    full_name='master_server.MasterServer.sync_init',
+    name='execute_sync_init',
+    full_name='master_server.MasterServer.execute_sync_init',
     index=1,
     containing_service=None,
     input_type=_TIMESTAMPREQUEST,
@@ -341,8 +341,8 @@ _MASTERSERVER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='sync',
-    full_name='master_server.MasterServer.sync',
+    name='execute_sync',
+    full_name='master_server.MasterServer.execute_sync',
     index=2,
     containing_service=None,
     input_type=_TIMESTAMPCHANGE,
