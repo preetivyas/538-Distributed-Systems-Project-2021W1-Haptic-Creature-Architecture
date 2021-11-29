@@ -27,7 +27,7 @@ class SensorToMaster(Thread):
             time.sleep(0.1)
             msg = {}
             msg['data'] = self.read_sensor()
-            msg['timestamp'] = time.time()+self.clock_change
+            msg['timestamp'] = time.time()*(10**6)+self.clock_change
             self.send_data(msg)
             self.sensor_msg = msg
 
@@ -38,7 +38,7 @@ class SensorToMaster(Thread):
 
                 if msg_receive['data'] == "initiate_time_sync":
                      msg['data'] = "node_timestamp"
-                     msg['timestamp'] = time.time()+self.clock_change
+                     msg['timestamp'] =time.time()*(10**6)+self.clock_change
                      self.send_data(msg)
 
                 if msg_receive['data'] == "clock_change":
@@ -60,6 +60,8 @@ class Sensor(Process):
             if 'Serial' in connection_type:
                 name = connection_config['name']
                 self.actuator_connections[name] = connection.SerialConnection(connection_config)
+                
+
 
     def compute_response(self, name, data):
         if name == 'actuator_1' and max(data) >= 1:
@@ -73,7 +75,11 @@ class Sensor(Process):
             self.master_thread.start()
        if self.actuator_connections:
             for name, connection in self.actuator_connections.items(): 
-                connection.connect()
+                try:
+                    connection.connect()
+                except KeyboardInterrupt:
+                    connection.end_communication() #PV added this to get serial ports free if the connection terminates
+                    print("disconnecting Serial port")    
 
        while True:
             time.sleep(0.1)

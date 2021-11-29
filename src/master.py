@@ -12,6 +12,8 @@ import master_server_pb2
 import master_server_pb2_grpc
 import numpy as np
 
+import os
+
 #handling data from local sensor
 class MasterToSensor(Thread):
 
@@ -135,7 +137,9 @@ class Master(Process):
         self.config = config
         self.other_master_present = False
         self.clock_change = 0.0 #local master's clock change
-        
+        self.logFile_base = config['Log_file_address']['loc']+config['Node_name']['name']+'_'+time.strftime("%Y%m%d_%H%M%S_")
+        print(self.logFile_base)
+
         if config['Time_head']['time_head']: #if master is time head that updates the time periodically
             self.clock_change = 0.0 #the value by which clock changes on all actuator and sensor node
             self.clock_time_diff = {} #difference between timestampl for each node, should be an array
@@ -177,6 +181,10 @@ class Master(Process):
         responses = [1, 1, 1, 1] #PV: todo: reference the model here
         return responses
 
+    def log_data(self, text, con_type):
+        with open(self.logFile_base +con_type+'.txt', 'a') as f:
+            f.write(text + os.linesep)
+
     def parse_sensor_protobuf(self, sensor_proto):
         timestamp = sensor_proto.timestamp
         row_num = sensor_proto.row_number
@@ -206,8 +214,10 @@ class Master(Process):
             other_sensor_msgs = {}
 
             for name, sensors in self.sensor_threads.items():
-                sensor_msgs[name] = sensors.sensor_msg
+                sensor_msgs[name] = sensors.sensor_msg #receiving sensor data from multiple sensors 
                 print(name, sensors.sensor_msg)
+                self.log_data(str(name) + str(sensors.sensor_msg)+'node_timestamp: '
+                +str(time.time()*(10**6) + self.clock_change), 'MS')
 
             if self.other_master_present:
                 for other_master_name, master in self.other_master_threads.items(): #iterate through master connections
