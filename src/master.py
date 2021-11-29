@@ -81,7 +81,7 @@ class MasterServicer(master_server_pb2_grpc.MasterServerServicer):
 
         sensor_proto = master_server_pb2.SensorData() #instance of proto object
 
-        sensor_proto.timestamp = time.time()*(10**6)+ self.clock_change
+        sensor_proto.timestamp = int(time.time()*(10**6)+ self.clock_change)
         sensor_proto.row_number = data_array.shape[1]
         sensor_proto.col_number = data_array.shape[0]
 
@@ -91,10 +91,10 @@ class MasterServicer(master_server_pb2_grpc.MasterServerServicer):
 
     def execute_sync_init (self, request, context):
         if request.sync_request: #sync_request message is true then return the current time stampe
-            timestamp_sync = time.time()*(10**6)+ self.clock_change
+            timestamp_sync = int(time.time()*(10**6)+ self.clock_change)
             return master_server_pb2.Timestamp(timestamp=timestamp_sync)
         else:
-            return master_server_pb2.Timestamp(timestamp=None)        
+            return master_server_pb2.Timestamp(timestamp=0)        
 
     def execute_sync (self, request, context):
         self.clock_change  = request.change
@@ -122,7 +122,6 @@ class MasterToMaster(Thread):
 
     def run(self):
         self.master_server.start()
-        self.master_server.wait_for_termination()
         while True:
             time.sleep(0.1)
 
@@ -259,8 +258,11 @@ class Master(Process):
                 
                     for other_master_name, master in self.other_master_threads.items():
                         local_time = int(time.time()*(10**6) + self.clock_change)
-                        status, self.clock_node[name] = master.perform_sync_init(local_time, sync_request)
-                        self.clock_time_diff[name] =  time.time()*(10**6) - self.clock_node[name]
+                        try:
+                            status, self.clock_node[name] = master.proxy.execute_sync_init(local_time, sync_request)
+                            self.clock_time_diff[name] =  time.time()*(10**6) - self.clock_node[name]
+                        except Exception as e:
+                            print("master execute_sync_init", e)
                   
                     #--------calculate delta------------
                     if len(self.clock_time_diff) == total_active_nodes and total_active_nodes != 0:
@@ -278,7 +280,10 @@ class Master(Process):
                     
                     # for other_master_name, master in self.other_master_threads.items():
                     #     local_time = int(time.time()*(10**6) + self.clock_change)
-                    #     self.clock_update[name] = master.perform_sync(local_time, self.clock_change )
+                    #     try:
+                    #         self.clock_update[name] = master.proxy.execute_sync(local_time, self.clock_change )
+                    #     except Exception as e:
+                    #         print("master execute_sync", e)
                     
                 else:
                     self.clock_sync_start_time = time.time()*(10**6)
