@@ -41,7 +41,10 @@ class MasterToSensor(Thread):
             success, msg_bytes = self.connection.receive()
             msg_send = {}
             if success:
-                msg = pickle.loads(msg_bytes)
+                try:
+                    msg = pickle.loads(msg_bytes)
+                except:
+                    continue
                 self.sensor_msg = msg
 
                 if msg['data'] == "node_timestamp":
@@ -169,19 +172,25 @@ class Master(Process):
 
 
     def read_model(self, path):
-        self.model = pickle.load(path) # placeholder
+        file = open(path, 'rb')
+        self.model = pickle.load(file)
+        file.close()
         
         for name, master in self.other_master_threads.items(): #PV: does every master use the same model?
             master.model = self.model
 
-    def compute_response(self, sensor_msgs, other_sensor_msgs=None):
-        data = {}
-        timestamps = {}
-        for name, sensor_msg in sensor_msgs.items():
-            data[name] = sensor_msg['data']
-            timestamps[name] = sensor_msg['timestamp']
-        responses = [1, 1, 1, 1] #PV: todo: reference the model here
-        return responses
+    def compute_response(self, sensor_data, sensor_data_timestamps, other_sensor_msgs=None):
+        timestamps = []
+        responses = []
+        for name, data_list in sensor_data.items():
+            data_array = np.array(data_list)
+
+            # data array hardcoded to be 3 by 10
+            # model array hardcoded to be 1 by 10
+            response = np.sum(self.model @ data_array.T)
+            responses.append(response) #PV: todo: reference the model here
+            timestamps.append(sensor_data_timestamps[name])
+        return np.array(timestamps), np.array(responses)
 
     def log_data(self, text, con_type):
         with open(self.logFile_base +con_type+'.txt', 'a') as f:
@@ -204,7 +213,7 @@ class Master(Process):
 
     def run(self):
         
-        # self.read_model(self.config['model_path'])
+        self.read_model('model.pkl')
         for name, sensor in self.sensor_threads.items():
             sensor.start()
         for name, master in self.other_master_threads.items():
@@ -229,12 +238,16 @@ class Master(Process):
             time.sleep(0.1)
             sensor_msgs = {}
             other_sensor_msgs = {}
+            sensor_data = {}
+            sensor_data_timestamps = {}
 
             for name, sensors in self.sensor_threads.items():
                 sensor_msgs[name] = sensors.sensor_msg #receiving sensor data from multiple sensors 
-                print(name, sensors.sensor_msg)
-                self.log_data(str(name) + str(sensors.sensor_msg)+'node_timestamp: '
-                +str(time.time()*(10**6) + self.clock_change), 'MS')
+                if 'data' in sensor_msgs[name].keys() and isinstance(sensor_msgs[name]['data'], list):
+                    sensor_data[name] = sensor_msgs[name]['data']
+                    sensor_data_timestamps[name] = sensor_msgs[name]['timestamp']
+                # self.log_data(str(name) + str(sensors.sensor_msg)+'node_timestamp: '
+                # +str(time.time()*(10**6) + self.clock_change), 'MS')
 
             if self.other_master_present:
                 for other_master_name, master in self.other_master_threads.items(): #iterate through master connections
@@ -245,14 +258,15 @@ class Master(Process):
                         sensor_name_msg = master_server_pb2.SensorName(name=sensor_name)
                         sensor_of_interest_proto = master.proxy.get_sensor_data(sensor_name_msg) #PV: similar for sync calls 
                         other_sensor_msgs[sensor_of_interest] = self.parse_sensor_protobuf(sensor_of_interest_proto) #building a dictionary of other sensor messages
-            # responses = self.compute_response(sensor_msgs, other_sensor_msgs)
-            # responses = [1, 1, 1, 1]
-
-            for name, actuator in self.actuator_clients.items():
-                # response = responses[name]
-                response = np.random.rand(1)[0]
-                timestamp = int(time.time()*(10**6) + self.clock_change)
-                actuator.perform_command(timestamp, response)
+            sensor_timestamps, responses = self.compute_response(sensor_data, sensor_data_timestamps, other_sensor_msgs)
+            
+            if responses.shape[0] > 0:
+                for name, actuator in self.actuator_clients.items():
+                    response_index = np.random.choice(responses.shape[0], 1)[0]
+                    response = responses[response_index]
+                    timestamp = int(sensor_timestamps[response_index]) # temporarily pass sensor data timestamps to measure delay
+                    # timestamp = int(time.time()*(10**6) + self.clock_change)
+                    actuator.perform_command(timestamp, response)
 
             #---------------------TIME SYNC ------------------------
 

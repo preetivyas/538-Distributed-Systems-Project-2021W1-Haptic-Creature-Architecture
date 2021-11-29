@@ -24,10 +24,11 @@ class SensorToMaster(Thread):
     def run(self):
         self.connection.connect()
         while True:
-            time.sleep(0.1)
+            time.sleep(0.2)
             msg = {}
             msg['data'] = self.read_sensor()
-            msg['timestamp'] = time.time()*(10**6)+self.clock_change
+            msg['timestamp'] = time.time()*(10**6)
+            # msg['timestamp'] = time.time()*(10**6)+self.clock_change
             self.send_data(msg)
             self.sensor_msg = msg
 

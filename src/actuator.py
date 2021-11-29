@@ -4,6 +4,7 @@ import connection
 import pickle
 from threading import Thread
 import time
+import logging
 
 import grpc
 import actuator_server_pb2
@@ -63,7 +64,8 @@ class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
         self.master_command_msg['timestamp'] = request.timestamp
         self.master_command_msg['data'] = request.master_command
 
-        #PV: todo: add actuator action code?
+        delay = time.time()*10**6-request.timestamp
+        logging.info('Time Delay, '+str(request.timestamp)+', '+str(delay))
     
         timestamp_new = int(time.time()*(10**6)+ self.clock_change)
         status = True
