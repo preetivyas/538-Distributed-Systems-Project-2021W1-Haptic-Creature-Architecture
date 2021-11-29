@@ -60,9 +60,12 @@ class TcpConnection(BaseConnection):
                     raise ValueError('Unrecognized role: Choose either server or client')
             except ValueError:
                 break
+            except KeyboardInterrupt:
+                self.end_communication() 
             except:
                 time.sleep(0.5)
                 continue
+            
 
     def send(self, data):
         if self.connected == True:

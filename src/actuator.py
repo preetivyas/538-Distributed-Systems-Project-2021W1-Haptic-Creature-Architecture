@@ -111,8 +111,8 @@ class Actuator(Process):
             for name, thread in self.sensor_threads.items():
                 thread.start()
 
-        master_timestamp = time.time()*10**6
-
+        master_timestamp = time.time()*(10**6)
+        
         while True:
             time.sleep(0.1)
             master_command = self.default_command
