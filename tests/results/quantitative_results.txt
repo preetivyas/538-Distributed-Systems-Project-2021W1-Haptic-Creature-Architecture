@@ -1,0 +1,11 @@
+Note: 
+The start time is measured from the start of the call until all connections are connected.
+However, in the delays.png plot there is a spike at the very start, and it lasts a lot longer
+than the average start time we measured, this is likely because at the beginning of the 
+program, there is still a lot of initialization work between connections are established 
+and actual computation of command.
+
+Also, the average delay is calculated excluding the spike at the start.
+
+Average delay (in secoonds) over about 10s is 0.0811438125
+Average start time (in seconds) over 10 runs is 0.11434675
