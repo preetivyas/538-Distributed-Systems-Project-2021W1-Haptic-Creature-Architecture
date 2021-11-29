@@ -64,7 +64,7 @@ class Sensor(Process):
 
 
     def compute_response(self, name, data):
-        if name == 'actuator_1' and max(data) >= 1:
+        if name == 'actuator_1' and max(max(data)) >= 1:
             response = 1
         else:
             response = 0

@@ -17,13 +17,16 @@ class ActuatorClient: #actuator client is actually master, master run functions 
         address = self.ip + ":" + self.port
         channel = grpc.insecure_channel(address)
         self.actuator = actuator_server_pb2_grpc.ActuatorServerStub(channel)
+        self.connected = False
 
     def perform_command(self, timestamp, command):
         try:
             command_msg = actuator_server_pb2.Command(timestamp=timestamp, master_command=command)
             status_msg = self.actuator.execute_command(command_msg)
+            self.connected = True
             return status_msg.status
         except Exception as e:
+            self.connected = False
             print("Perform Command Error:", e)
             return False
 
@@ -31,8 +34,10 @@ class ActuatorClient: #actuator client is actually master, master run functions 
         try:
             timestamprequest_msg = actuator_server_pb2.TimestampRequest(timestamp=timestamp, sync_request=sync_request)
             timestamp_msg = self.actuator.execute_sync_init(timestamprequest_msg) 
+            self.connected = True
             return True, timestamp_msg.timestamp
         except Exception as e:
+            self.connected = False
             print("Perform Sync Init Error: ", e)
             return False, 0.0
 
@@ -40,8 +45,10 @@ class ActuatorClient: #actuator client is actually master, master run functions 
         try:
             timestampsync_msg = actuator_server_pb2.TimestampChange(timestamp=timestamp, change= change)
             status_msg = self.actuator.execute_sync(timestampsync_msg) 
+            self.connected = True
             return status_msg.status
         except Exception as e:
+            self.connected = False
             print("Perform Sync Error: ", e)
             return False
 

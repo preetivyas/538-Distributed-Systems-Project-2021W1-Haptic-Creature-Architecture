@@ -13,6 +13,7 @@ import master_server_pb2_grpc
 import numpy as np
 
 import os
+import logging
 
 #handling data from local sensor
 class MasterToSensor(Thread):
@@ -138,6 +139,7 @@ class Master(Process):
         self.clock_change = 0.0 #local master's clock change
         self.logFile_base = config['Log_file_address']['loc']+config['Node_name']['name']+'_'+time.strftime("%Y%m%d_%H%M%S_")
         print(self.logFile_base)
+        self.ready = False
 
 
         if config['Time_head']['time_head']: #if master is time head that updates the time periodically
@@ -209,6 +211,21 @@ class Master(Process):
             master.start()
 
         while True:
+            if not self.ready:
+                sensors_ready = False
+                for name, sensors in self.sensor_threads.items():
+                    if sensor.connection.connect == False:
+                        break
+                    sensors_ready = True
+                actuators_ready = False
+                for name, actuator in self.actuator_clients.items():
+                    if actuator.connected == False:
+                        break
+                    actuators_ready = True
+                if sensors_ready and actuators_ready:
+                    self.ready = True
+                    logging.info('System Ready, '+str(time.time()*10**6))
+
             time.sleep(0.1)
             sensor_msgs = {}
             other_sensor_msgs = {}
