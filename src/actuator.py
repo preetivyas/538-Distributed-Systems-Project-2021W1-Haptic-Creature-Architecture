@@ -19,19 +19,31 @@ class ActuatorClient: #actuator client is actually master, master run functions 
         self.actuator = actuator_server_pb2_grpc.ActuatorServerStub(channel)
 
     def perform_command(self, timestamp, command):
-        command_msg = actuator_server_pb2.Command(timestamp=timestamp, master_command=command)
-        status_msg = self.actuator.execute_command(command_msg) 
-        return status_msg.status
+        try:
+            command_msg = actuator_server_pb2.Command(timestamp=timestamp, master_command=command)
+            status_msg = self.actuator.execute_command(command_msg)
+            return status_msg.status
+        except Exception as e:
+            print("Perform Command Error:", e)
+            return False
 
-    def perform_sync_init(self, timestamp,   sync_request):
-        timestamprequest_msg = actuator_server_pb2.TimestampRequest(timestamp=timestamp, sync_request=sync_request)
-        timestamp_msg = self.actuator.execute_sync_init(timestamprequest_msg) 
-        return timestamp_msg.timestamp    
+    def perform_sync_init(self, timestamp, sync_request):
+        try:
+            timestamprequest_msg = actuator_server_pb2.TimestampRequest(timestamp=timestamp, sync_request=sync_request)
+            timestamp_msg = self.actuator.execute_sync_init(timestamprequest_msg) 
+            return True, timestamp_msg.timestamp
+        except Exception as e:
+            print("Perform Sync Init Error: ", e)
+            return False, 0.0
 
-    def perform_sync(self,  timestamp,  change):
-        timestampsync_msg = actuator_server_pb2.TimestampChange(timestamp=timestamp, change= change)
-        status_msg = self.actuator.execute_sync(timestampsync_msg) 
-        return status_msg.status     
+    def perform_sync(self, timestamp, change):
+        try:
+            timestampsync_msg = actuator_server_pb2.TimestampChange(timestamp=timestamp, change= change)
+            status_msg = self.actuator.execute_sync(timestampsync_msg) 
+            return status_msg.status
+        except Exception as e:
+            print("Perform Sync Error: ", e)
+            return False
 
 class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
     def __init__(self):
@@ -46,14 +58,14 @@ class ActuatorServicer(actuator_server_pb2_grpc.ActuatorServerServicer):
 
         #PV: todo: add actuator action code?
     
-        timestamp_new = time.time()*(10**6)+ self.clock_change
+        timestamp_new = int(time.time()*(10**6)+ self.clock_change)
         status = True
         return_msg = actuator_server_pb2.Status(timestamp=timestamp_new, status=status)
         return return_msg
 
     def execute_sync_init (self, request, context):
         if request.sync_request: #sync_request message is true then return the current time stampe
-            timestamp_sync = time.time()*(10**6)+ self.clock_change
+            timestamp_sync = int(time.time()*(10**6)+ self.clock_change)
             return actuator_server_pb2.Timestamp(timestamp=timestamp_sync)
         else:
             return actuator_server_pb2.Timestamp(timestamp=0.0)        
@@ -96,7 +108,7 @@ class Actuator(Process):
                 self.master_servicer = ActuatorServicer()
                 actuator_server_pb2_grpc.add_ActuatorServerServicer_to_server(
                     self.master_servicer, self.master_thread)
-                address = config['ip'] + ':' + config['port']
+                address = connection_config['ip'] + ':' + connection_config['port']
                 self.master_thread.add_insecure_port(address)
             if 'Serial' in connection_type:
                 name = connection_config['name']
@@ -106,8 +118,8 @@ class Actuator(Process):
     def run(self):
         if self.master_thread:
             self.master_thread.start()
-            self.master_thread.wait_for_termination()
-        elif self.sensor_threads:
+
+        if self.sensor_threads:
             for name, thread in self.sensor_threads.items():
                 thread.start()
 
@@ -127,8 +139,9 @@ class Actuator(Process):
 
             if self.master_thread != None:
                 master_command_msg = self.master_servicer.master_command_msg
-                master_timestamp = master_command_msg['master_timestamp']
-                master_command = master_command_msg['data']
+                if len(master_command_msg) != 0:
+                    master_timestamp = master_command_msg['timestamp']
+                    master_command = master_command_msg['data']
 
             use_master = True
             sensor_command = master_command

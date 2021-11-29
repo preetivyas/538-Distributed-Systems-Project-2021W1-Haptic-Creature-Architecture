@@ -68,14 +68,10 @@ class TcpConnection(BaseConnection):
             
 
     def send(self, data):
-        if self.connected == True:
-            if self.role == 'server':
-                self.connection.sendall(data)
-            elif self.role == 'client':
-                self.socket.sendall(data)
-            return True
-        else:
-            return False
+        if self.role == 'server':
+            self.connection.sendall(data)
+        elif self.role == 'client':
+            self.socket.sendall(data)
 
     def receive(self):
         try:

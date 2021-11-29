@@ -15,18 +15,18 @@ class ActuatorServerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.execute = channel.unary_unary(
-                '/actuator_server.ActuatorServer/execute',
+        self.execute_command = channel.unary_unary(
+                '/actuator_server.ActuatorServer/execute_command',
                 request_serializer=actuator__server__pb2.Command.SerializeToString,
                 response_deserializer=actuator__server__pb2.Status.FromString,
                 )
-        self.sync_init = channel.unary_unary(
-                '/actuator_server.ActuatorServer/sync_init',
+        self.execute_sync_init = channel.unary_unary(
+                '/actuator_server.ActuatorServer/execute_sync_init',
                 request_serializer=actuator__server__pb2.TimestampRequest.SerializeToString,
                 response_deserializer=actuator__server__pb2.Timestamp.FromString,
                 )
-        self.sync = channel.unary_unary(
-                '/actuator_server.ActuatorServer/sync',
+        self.execute_sync = channel.unary_unary(
+                '/actuator_server.ActuatorServer/execute_sync',
                 request_serializer=actuator__server__pb2.TimestampChange.SerializeToString,
                 response_deserializer=actuator__server__pb2.TimestampChangeStatus.FromString,
                 )
@@ -36,19 +36,19 @@ class ActuatorServerServicer(object):
     """Interface exported by the server.
     """
 
-    def execute(self, request, context):
+    def execute_command(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def sync_init(self, request, context):
+    def execute_sync_init(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def sync(self, request, context):
+    def execute_sync(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,18 +57,18 @@ class ActuatorServerServicer(object):
 
 def add_ActuatorServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'execute': grpc.unary_unary_rpc_method_handler(
-                    servicer.execute,
+            'execute_command': grpc.unary_unary_rpc_method_handler(
+                    servicer.execute_command,
                     request_deserializer=actuator__server__pb2.Command.FromString,
                     response_serializer=actuator__server__pb2.Status.SerializeToString,
             ),
-            'sync_init': grpc.unary_unary_rpc_method_handler(
-                    servicer.sync_init,
+            'execute_sync_init': grpc.unary_unary_rpc_method_handler(
+                    servicer.execute_sync_init,
                     request_deserializer=actuator__server__pb2.TimestampRequest.FromString,
                     response_serializer=actuator__server__pb2.Timestamp.SerializeToString,
             ),
-            'sync': grpc.unary_unary_rpc_method_handler(
-                    servicer.sync,
+            'execute_sync': grpc.unary_unary_rpc_method_handler(
+                    servicer.execute_sync,
                     request_deserializer=actuator__server__pb2.TimestampChange.FromString,
                     response_serializer=actuator__server__pb2.TimestampChangeStatus.SerializeToString,
             ),
@@ -84,7 +84,7 @@ class ActuatorServer(object):
     """
 
     @staticmethod
-    def execute(request,
+    def execute_command(request,
             target,
             options=(),
             channel_credentials=None,
@@ -94,14 +94,14 @@ class ActuatorServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/execute',
+        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/execute_command',
             actuator__server__pb2.Command.SerializeToString,
             actuator__server__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def sync_init(request,
+    def execute_sync_init(request,
             target,
             options=(),
             channel_credentials=None,
@@ -111,14 +111,14 @@ class ActuatorServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/sync_init',
+        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/execute_sync_init',
             actuator__server__pb2.TimestampRequest.SerializeToString,
             actuator__server__pb2.Timestamp.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def sync(request,
+    def execute_sync(request,
             target,
             options=(),
             channel_credentials=None,
@@ -128,7 +128,7 @@ class ActuatorServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/sync',
+        return grpc.experimental.unary_unary(request, target, '/actuator_server.ActuatorServer/execute_sync',
             actuator__server__pb2.TimestampChange.SerializeToString,
             actuator__server__pb2.TimestampChangeStatus.FromString,
             options, channel_credentials,
