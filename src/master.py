@@ -246,9 +246,6 @@ class Master(Process):
                 if 'data' in sensor_msgs[name].keys() and isinstance(sensor_msgs[name]['data'], list):
                     sensor_data[name] = sensor_msgs[name]['data']
                     sensor_data_timestamps[name] = sensor_msgs[name]['timestamp']
-                # self.log_data(str(name) + str(sensors.sensor_msg)+'node_timestamp: '
-                # +str(time.time()*(10**6) + self.clock_change), 'MS')
-
             if self.other_master_present:
                 for other_master_name, master in self.other_master_threads.items(): #iterate through master connections
                     master.master_servicer.sensor_msgs = sensor_msgs #update master servicer with latest sensor message
@@ -260,13 +257,16 @@ class Master(Process):
                         other_sensor_msgs[sensor_of_interest] = self.parse_sensor_protobuf(sensor_of_interest_proto) #building a dictionary of other sensor messages
             sensor_timestamps, responses = self.compute_response(sensor_data, sensor_data_timestamps, other_sensor_msgs)
             
-            if responses.shape[0] > 0:
+            if sensor_timestamps.shape[0] > 0:
+                index = 0
                 for name, actuator in self.actuator_clients.items():
-                    response_index = np.random.choice(responses.shape[0], 1)[0]
-                    response = responses[response_index]
-                    timestamp = int(sensor_timestamps[response_index]) # temporarily pass sensor data timestamps to measure delay
+                    response = responses[index]
+                    timestamp = int(sensor_timestamps[index]) # temporarily pass sensor data timestamps to measure delay
                     # timestamp = int(time.time()*(10**6) + self.clock_change)
                     actuator.perform_command(timestamp, response)
+                    index += 1
+                    if index >= len(sensor_timestamps):
+                        break
 
             #---------------------TIME SYNC ------------------------
 

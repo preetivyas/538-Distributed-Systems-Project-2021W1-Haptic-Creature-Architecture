@@ -120,7 +120,6 @@ class UdpConnection(BaseConnection):
             except ValueError:
                 break
             except:
-                time.sleep(0.5)
                 continue
 
     def send(self, data):

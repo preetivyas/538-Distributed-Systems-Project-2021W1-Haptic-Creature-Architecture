@@ -3,24 +3,27 @@ import matplotlib.pyplot as plt
 
 
 
-logpath = '../results/actuator_1.log'
+filename = 'b32768'
+logpath = '../results/'
 delays = []
-with open(logpath, 'r') as file:
+times = []
+with open(logpath+filename+'.log', 'r') as file:
     for line in file.readlines():
         if len(line.split(', ')) >= 3:
+            time = float(line.split(', ')[1].rstrip())
             delay = float(line.split(', ')[2].rstrip())
             delays.append(delay)
+            times.append(time)
 
 delays = np.array(delays)
 delays /= (10**6)
 
-size = delays.shape[0]
-period = 0.1
-duration = size * period
-times = np.linspace(0, duration, size)
+times = np.array(times)
+times /= (10**6)
+times = times - times[0]
 
 delay_avg = np.mean(delays[20:])
-print("Average delay (in secoonds) is", delay_avg)
+print("Average delay (in seconds) is", delay_avg)
 
 fig, ax = plt.subplots(1, 1)
 ax.plot(times, delays, 'o-', label='Delays')
@@ -31,7 +34,7 @@ ax.set_title('Delays')
 plt.legend()
 plt.grid()
 plt.show()
-fig.savefig('../results/delays.png')
+fig.savefig('../results/delays_'+filename+'.png')
 
 fig, ax = plt.subplots(1, 1)
 
@@ -51,4 +54,4 @@ ax.set_title('Delay CDF')
 plt.legend()
 plt.grid()
 plt.show()
-fig.savefig('../results/delay_cdf.png')
+fig.savefig('../results/delay_cdf_'+filename+'.png')

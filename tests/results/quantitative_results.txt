@@ -1,11 +1,14 @@
-Note: 
-The start time is measured from the start of the call until all connections are connected.
-However, in the delays.png plot there is a spike at the very start, and it lasts a lot longer
-than the average start time we measured, this is likely because at the beginning of the 
-program, there is still a lot of initialization work between connections are established 
-and actual computation of command.
+# of sensors and actuators	average delay (s)
+1							0.11243849632352941
+2 							0.102482623046875
+3 							0.07009151155462186
+4 							0.10192673278236915
+5 							0.06051647468354431
 
-Also, the average delay and delay cdf are calculated excluding the spike at the start.
 
-Average delay (in secoonds) over about 10s is 0.0811438125
-Average start time (in seconds) over 10 runs is 0.11434675
+size of buffer 				average delay(s)
+512 						0.102482623046875
+1024 						0.11144726715686273
+2048 						0.11896399390243904
+4096   						0.125558244
+32768 						0.12154869062500002
