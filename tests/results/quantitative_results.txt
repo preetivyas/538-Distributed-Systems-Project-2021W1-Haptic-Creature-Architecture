@@ -12,3 +12,13 @@ size of buffer 				average delay(s)
 2048 						0.11896399390243904
 4096   						0.125558244
 32768 						0.12154869062500002
+
+
+Testing System:
+Intel Core i7-10750H CPU @ 2.60GHz × 12
+31.1 BG
+Ubuntu 20.04
+
+Footprint
+2.6% CPU
+0.6% memory
