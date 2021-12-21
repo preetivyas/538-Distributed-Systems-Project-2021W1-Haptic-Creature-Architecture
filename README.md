@@ -2,6 +2,9 @@
 Course Project for CPSC 538 2021W1
 
 ## Prereq Packages
+- gRpc and google protobuf: Needed for RPC connections
+- pySerial: Needed for serial connections
+- numpy: Needed for master process to compute response
 
 ## Host virtual serial port
 Use the following command to create virtual serial port in terminal
